@@ -1,0 +1,36 @@
+@{
+    var registering = (string?)ViewData["Page"] == "register";
+}
+<section class="auth-shell">
+    <div class="card auth-card">
+        <div class="auth-intro">
+            <img src="~/favicon.svg" width="48" height="48" alt="">
+            <h1>@(registering ? "Create your account" : "Sign in to your account")</h1>
+            <p>@(registering ? "Start practicing and track your scores." : "Continue practicing for your Class 9 exams.")</p>
+        </div>
+        <nav class="auth-switch" aria-label="Account options">
+            <a href="/login" class="@(!registering ? "active" : null)" aria-current="@(!registering ? "page" : null)">Sign In</a>
+            <a href="/register" class="@(registering ? "active" : null)" aria-current="@(registering ? "page" : null)">Create Account</a>
+        </nav>
+        <form id="auth-form" method="post" asp-antiforgery="false" data-mode="@ViewData["Page"]" novalidate>
+            @if (registering)
+            {
+                <label for="full-name">Full name</label>
+                <input id="full-name" name="fullName" autocomplete="name" placeholder="Your full name" minlength="2" maxlength="100" required>
+                <small id="full-name-error" class="field-error" hidden>Enter your full name.</small>
+            }
+            <label for="email">Email address</label>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" maxlength="254" required>
+            <small id="email-error" class="field-error" hidden>Enter a valid email address.</small>
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="@(registering ? "new-password" : "current-password")"
+                placeholder="@(registering ? "At least 8 characters" : "Enter your password")" minlength="@(registering ? "8" : null)" maxlength="72" required>
+            <small id="password-error" class="field-error" hidden>@(registering ? "Use at least 8 characters." : "Enter your password.")</small>
+            <p id="auth-error" class="alert" role="alert" hidden></p>
+            <button class="button primary" type="submit">@(registering ? "Create Account" : "Sign In")</button>
+        </form>
+    </div>
+</section>
+@section Scripts {
+    <script type="module" src="~/js/auth.js" asp-append-version="true"></script>
+}

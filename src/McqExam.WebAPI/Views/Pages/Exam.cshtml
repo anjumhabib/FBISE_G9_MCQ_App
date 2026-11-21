@@ -1,0 +1,59 @@
+<div class="page exam-page">
+    <p id="loading-exam" class="card state" role="status">Loading test…</p>
+    <p id="exam-error" class="alert" role="alert" hidden></p>
+    <a id="new-test" class="button secondary" href="/setup" hidden>New Test</a>
+    <section id="exam-toolbar" class="card exam-toolbar" aria-label="Test controls" hidden>
+        <div><h1 id="exam-subject"></h1><span class="badge" id="exam-mode"></span></div>
+        <div id="exam-clock" class="exam-clock" role="timer"><strong></strong><small></small></div>
+        <div class="exam-progress"><span id="question-position"></span>
+            <progress id="exam-progress" aria-label="Question position"></progress>
+        </div>
+        <button id="open-submit" type="button" class="button primary">Submit Test</button>
+    </section>
+    <div id="exam-layout" class="exam-layout" hidden>
+        <section class="card question-card" aria-labelledby="question-title">
+            <div class="question-top"><h2 id="question-title" tabindex="-1"></h2>
+                <span id="question-chapter" class="badge slate"></span>
+                <span id="question-bloom" class="badge"></span>
+            </div>
+            <p class="question-text" id="question-text"></p>
+            <img class="diagram" id="question-image" alt="Diagram for this question" hidden>
+            <fieldset class="option-list" id="exam-options">
+                <legend class="sr-only">Select an answer</legend>
+                @foreach (var letter in "ABCD")
+                {
+                    <label class="option">
+                        <input type="radio" name="answer" value="@letter">
+                        <span class="letter">@letter</span><span data-field="option"></span>
+                    </label>
+                }
+            </fieldset>
+            <div class="question-footer">
+                <button id="previous" type="button" class="button secondary">Previous</button>
+                <button id="mark-question" type="button" class="button secondary mark-button" aria-pressed="false">Mark for Review</button>
+                <button id="next" type="button" class="button primary">Next</button>
+            </div>
+        </section>
+        <aside class="card navigator">
+            <div class="section-heading-row"><h2>Question Navigator</h2><span class="badge slate" id="answered-count"></span></div>
+            <div class="question-palette" id="question-palette" aria-label="Go to question"></div>
+            <ul class="legend">
+                <li><i class="current"></i>Current</li><li><i class="answered"></i>Answered</li>
+                <li><i class="marked"></i>Marked</li><li><i></i>Unanswered</li>
+            </ul>
+            <p class="keyboard-hint">Keyboard <kbd>A</kbd>–<kbd>D</kbd> or <kbd>1</kbd>–<kbd>4</kbd> to answer. <kbd>←</kbd> <kbd>→</kbd> to move.</p>
+        </aside>
+    </div>
+    <dialog id="confirm-submit" aria-labelledby="submit-title">
+        <h2 id="submit-title">Submit this test?</h2>
+        <p id="submit-summary"></p>
+        <p id="submit-skipped">Unanswered questions will be marked as skipped.</p>
+        <div class="dialog-actions">
+            <button id="keep-working" type="button" class="button secondary" autofocus>Keep working</button>
+            <button id="submit-test" type="button" class="button primary">Submit Test</button>
+        </div>
+    </dialog>
+</div>
+@section Scripts {
+    <script type="module" src="~/js/exam.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,91 @@
+<div class="page setup-page">
+    <section class="hero">
+        <span class="hero-label">FBISE · CLASS 9 SCIENCE</span>
+        <h1>Set up your test</h1>
+        <p>Choose your subject, chapters, and how you want to practice.</p>
+    </section>
+    <p id="setup-error" class="alert" role="alert" hidden></p>
+    <p id="loading-subjects" class="card state" role="status">Loading subjects…</p>
+    <div id="empty-subjects" class="card state" hidden><p>No subjects are available.</p><button id="retry-subjects" class="button secondary">Try again</button></div>
+    <section id="setup-subjects" class="card setup-section" aria-labelledby="subjects-title" hidden>
+        <div class="section-head"><span class="step" aria-hidden="true">1</span><div>
+            <h2 id="subjects-title">Choose a subject</h2><p>Select one subject for this test.</p>
+        </div></div>
+        <div id="subject-grid" class="subject-grid" role="group" aria-label="Subjects"></div>
+    </section>
+    <section id="setup-chapters" class="card setup-section" aria-labelledby="chapters-title" hidden>
+        <div class="section-heading-row">
+            <div class="section-head"><span class="step" aria-hidden="true">2</span><div>
+                <h2 id="chapters-title">Select chapters</h2>
+                <p id="chapter-summary"></p>
+            </div></div>
+            <button id="toggle-chapters" type="button" class="button secondary small">Deselect All</button>
+        </div>
+        <p id="empty-chapters" class="empty-inline" hidden></p>
+        <div id="chapter-grid" class="chapter-grid"></div>
+    </section>
+    <form id="start-test" class="card setup-section" aria-labelledby="settings-title" hidden>
+        <div class="section-head"><span class="step" aria-hidden="true">3</span><div>
+            <h2 id="settings-title">Configure your test</h2><p>Set your difficulty focus, length, and mode.</p>
+        </div></div>
+        <div class="configuration">
+            <fieldset>
+                <legend>Bloom's Level Filter</legend>
+                <div id="bloom-filters" class="pills">
+                    @foreach (var level in new[] { "All", "Knowledge", "Conceptual", "Application", "Analyzing" })
+                    {
+                        <button type="button" class="pill" data-level="@level" aria-pressed="false">@level</button>
+                    }
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Number of Questions</legend>
+                <div id="count-presets" class="pills">
+                    @foreach (var count in new[] { 10, 15, 20, 30 })
+                    {
+                        <button type="button" class="pill" data-count="@count" aria-pressed="false">@count</button>
+                    }
+                    <input id="custom-count" class="custom-count" type="number" min="1" max="200" step="1" value="10" aria-label="Custom number of questions">
+                </div>
+            </fieldset>
+        </div>
+        <fieldset id="mode-field" class="mode-field">
+            <legend>Test Mode</legend>
+            <div class="mode-grid">
+                <label class="mode selected">
+                    <input type="radio" name="test-mode" value="Exam" checked>
+                    <span><strong>Timed Exam Mode</strong><small>1 minute per question · answers at the end</small></span>
+                </label>
+                <label class="mode">
+                    <input type="radio" name="test-mode" value="Practice">
+                    <span><strong>Practice Mode</strong><small>Untimed · work at your own pace</small></span>
+                </label>
+            </div>
+        </fieldset>
+        <label class="diagrams-toggle"><input id="include-diagrams" type="checkbox" checked> Include Diagram Questions</label>
+        <p id="match-error" class="alert" role="alert" hidden></p>
+        <p id="start-error" class="alert" role="alert" hidden></p>
+        <div class="setup-actions">
+            <span role="status"><span id="match-message"></span><strong id="match-count" hidden></strong><span id="match-label" hidden> matching questions</span>
+                <small id="count-warning" hidden>Choose fewer questions or broaden the filters.</small></span>
+            <button id="start-button" class="button primary" type="submit" disabled>Start Test</button>
+        </div>
+    </form>
+</div>
+<template id="subject-template">
+    <button class="subject-card" type="button">
+        <span class="subject-icon" data-field="icon" aria-hidden="true"></span>
+        <strong data-field="name"></strong>
+        <span class="subject-count" data-field="count"></span>
+    </button>
+</template>
+<template id="chapter-template">
+    <label class="chapter">
+        <input type="checkbox">
+        <span><small data-field="number"></small><strong data-field="title"></strong></span>
+        <span class="chapter-count" data-field="count"></span>
+    </label>
+</template>
+@section Scripts {
+    <script type="module" src="~/js/setup.js" asp-append-version="true"></script>
+}

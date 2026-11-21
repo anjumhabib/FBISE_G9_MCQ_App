@@ -1,0 +1,59 @@
+<div class="page history-page">
+    <header class="page-heading screen-only">
+        <div><h1>History &amp; Reports</h1><p>Track your scores and see which topics need more practice.</p></div>
+        <button id="print-report" type="button" class="button primary" disabled>Print / Save PDF Report</button>
+    </header>
+    <p id="loading-history" class="card state" role="status">Loading history…</p>
+    <p id="history-error" class="alert" role="alert" hidden></p>
+    <header id="print-header" class="print-only print-heading" hidden>
+        <h1>Student Performance Report Card</h1><p>FBISE Class 9 Science · <span id="report-student"></span></p>
+        <p>Generated <span id="report-date"></span></p>
+    </header>
+    <div id="history-kpis" class="kpi-grid" hidden>
+        <div class="card kpi"><span>Total Tests Taken</span><strong id="total-tests"></strong></div>
+        <div class="card kpi"><span>Overall Average</span><strong id="overall-average"></strong></div>
+        <div class="card kpi"><span>Best Subject</span><strong id="best-subject"></strong><small id="best-score" hidden></small></div>
+        <div class="card kpi"><span>Weakest Bloom's Level</span><strong id="weakest-bloom"></strong><small id="weakest-score" hidden></small></div>
+    </div>
+    <section id="score-trend" class="card report-card" hidden>
+        <h2>Score Trend</h2><p class="muted">Recent test scores in chronological order</p>
+        <div id="score-chart" class="chart" hidden><canvas id="plot" role="img" aria-label="Line chart of recent scores. Score values are listed in Attempt History."></canvas></div>
+        <p id="empty-chart" class="empty-inline" hidden>Complete a test to see your scores here.</p>
+    </section>
+    <section id="attempt-history" class="card report-card history-table" hidden>
+        <div class="section-heading-row"><h2>Attempt History</h2><span id="history-tests" class="badge slate"></span></div>
+        <div id="history-table" class="table-scroll" tabindex="0" role="region" aria-label="Attempt history table" hidden>
+            <table>
+                <thead><tr><th scope="col">Date</th><th scope="col">Subject</th><th scope="col">Mode</th><th scope="col">Score</th>
+                    <th scope="col">Percentage</th><th scope="col">Time Taken</th><th scope="col" class="screen-only">Action</th></tr></thead>
+                <tbody id="attempt-rows"></tbody>
+            </table>
+        </div>
+        <div id="empty-history" class="empty-inline" hidden>
+            <p>Your completed tests will appear here.</p><a class="button secondary screen-only" href="/setup">New Test</a>
+        </div>
+    </section>
+    <div id="history-diagnostics" class="diagnostics" hidden>
+        <div><partial name="_Bloom" /></div>
+        <section class="card report-card">
+            <h2>Chapters to Revisit</h2>
+            <ul id="weakest-chapters" class="diagnostic-list" hidden></ul>
+            <p id="empty-chapters-report" class="empty-inline" hidden>Chapter accuracy will appear after your first test.</p>
+        </section>
+    </div>
+    <section id="subject-averages" class="card report-card" hidden>
+        <h2>Subject Averages</h2><ul id="average-list" class="diagnostic-list"></ul>
+    </section>
+</div>
+<template id="attempt-row">
+    <tr><td data-field="date"></td><td data-field="subject"></td><td data-field="mode"></td><td data-field="score"></td>
+        <td><span data-field="percentage" class="badge"></span></td><td data-field="time"></td>
+        <td class="screen-only"><a class="button secondary small">Review</a></td></tr>
+</template>
+<template id="diagnostic-row">
+    <li><div><strong data-field="title"></strong><small data-field="detail" hidden></small></div><span data-field="score"></span></li>
+</template>
+@section Scripts {
+    <script src="~/vendor/chart.umd.min.js" asp-append-version="true" defer></script>
+    <script type="module" src="~/js/history.js" asp-append-version="true"></script>
+}

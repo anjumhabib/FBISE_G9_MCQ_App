@@ -1,0 +1,11 @@
+<section class="card report-card">
+    <h2>Bloom's Level Breakdown</h2>
+    <p class="muted">Accuracy by type of thinking</p>
+    <div class="bloom-list" id="bloom-list"></div>
+</section>
+<template id="bloom-row">
+    <div class="bloom-item">
+        <div><strong data-field="level"></strong><span data-field="accuracy"></span></div>
+        <progress max="100"></progress>
+    </div>
+</template>

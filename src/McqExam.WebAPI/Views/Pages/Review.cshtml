@@ -1,0 +1,51 @@
+<div class="page review-page">
+    <header class="page-heading">
+        <div><h1>Test results</h1><p>Review your answers and see where to focus.</p></div>
+        <a class="button secondary" href="/history">History &amp; Reports</a>
+    </header>
+    <p id="loading-review" class="card state" role="status">Loading results…</p>
+    <p id="review-error" class="alert" role="alert" hidden></p>
+    <section id="score-summary" class="hero result-hero" aria-label="Score summary" hidden>
+        <div class="score-circle"><strong id="result-score"></strong><small>Score</small></div>
+        <div class="result-metadata">
+            <span class="hero-label" id="result-mode"></span>
+            <h2 id="result-subject"></h2><p id="result-date"></p>
+        </div>
+        <dl><div><dt>Marks</dt><dd id="result-marks"></dd></div>
+            <div><dt>Time Taken</dt><dd id="result-time"></dd></div></dl>
+    </section>
+    <div id="review-bloom" hidden><partial name="_Bloom" /></div>
+    <section id="question-review" class="review-section" hidden>
+        <div class="section-heading-row review-heading"><h2>Question Review</h2>
+            <div class="pills" id="review-filters" role="group" aria-label="Filter reviewed questions">
+                @foreach (var filter in new[] { "All", "Incorrect Only", "Correct", "Skipped" })
+                {
+                    <button type="button" class="pill" aria-pressed="false">@filter</button>
+                }
+            </div>
+        </div>
+        <div id="review-questions" class="review-section"></div>
+        <p id="empty-review" class="card state" hidden>No questions match this filter.</p>
+    </section>
+</div>
+<template id="review-card">
+    <article class="card question-card reviewed">
+        <div class="question-top">
+            <h3 data-field="position"></h3>
+            <span data-field="chapter" class="badge slate"></span><span data-field="bloom" class="badge"></span>
+            <span data-field="status" class="badge answer-status"></span>
+        </div>
+        <p data-field="text" class="question-text"></p>
+        <img data-field="diagram" class="diagram" alt="Diagram for this question" loading="lazy" hidden>
+        <div data-field="options" class="option-list"></div>
+    </article>
+</template>
+<template id="review-option">
+    <div class="option">
+        <span data-field="letter" class="letter"></span><span data-field="text"></span>
+        <strong data-field="label" class="option-label" hidden></strong>
+    </div>
+</template>
+@section Scripts {
+    <script type="module" src="~/js/review.js" asp-append-version="true"></script>
+}

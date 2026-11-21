@@ -1,0 +1,41 @@
+@{
+    var page = (string?)ViewData["Page"];
+    var protectedPage = page is not ("login" or "register");
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>@ViewData["Title"] · FBISE 9th MCQ Bank</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8fafc">
+    <link rel="icon" href="~/favicon.svg">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true">
+    <script src="~/js/session.js" asp-append-version="true"></script>
+</head>
+<body data-protected="@(protectedPage ? "true" : "false")" data-attempt-id="@ViewData["AttemptId"]">
+    <a href="#content" class="skip-link">Skip to content</a>
+    <header class="site-header">
+        <div class="site-bar">
+            <a class="brand" id="brand" href="/login">
+                <img src="~/favicon.svg" width="36" height="36" alt="">
+                <span>FBISE 9th MCQ Bank<small>Class 9 Science</small></span>
+            </a>
+            <nav id="student-nav" aria-label="Main navigation" hidden>
+                <a href="/setup" class="@(page == "setup" ? "active" : null)" aria-current="@(page == "setup" ? "page" : null)">New Test</a>
+                <a href="/history" class="@(page == "history" ? "active" : null)" aria-current="@(page == "history" ? "page" : null)">History &amp; Reports</a>
+            </nav>
+            <div class="account" id="student-account" hidden>
+                <span class="avatar" aria-hidden="true"></span>
+                <span class="account-name"></span>
+                <button id="logout" class="button ghost small" type="button">Logout</button>
+            </div>
+        </div>
+    </header>
+    <main id="content" tabindex="-1">
+        @RenderBody()
+    </main>
+    <script type="module" src="~/js/layout.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
