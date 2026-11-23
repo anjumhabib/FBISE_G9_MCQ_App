@@ -1,18 +1,30 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using McqExam.Application;
+using McqExam.Domain;
 using McqExam.Infrastructure;
 using McqExam.WebAPI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+var settingsIndex = builder.Configuration.Sources.ToList().FindLastIndex(source =>
+    source is JsonConfigurationSource json &&
+    (json.Path == "appsettings.json" || json.Path == $"appsettings.{builder.Environment.EnvironmentName}.json"));
+builder.Configuration.Sources.Insert(settingsIndex + 1, new JsonConfigurationSource
+{
+    Path = "appsettings.Local.json",
+    Optional = true,
+    FileProvider = builder.Environment.ContentRootFileProvider
+});
 var jwtKey = builder.Configuration["Jwt:Key"];
 if (jwtKey is null && builder.Environment.IsDevelopment())
     jwtKey = Convert.ToBase64String(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32));
@@ -30,29 +42,54 @@ builder.Services.AddDbContext<ExamDb>(options =>
 builder.Services.AddScoped<IUserStore, UserStore>();
 builder.Services.AddScoped<IExamStore, ExamStore>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<AdminSeeder>();
 builder.Services.AddScoped<ISessionIssuer, SessionIssuer>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ExamService>();
+builder.Services.AddScoped<IPublicStudyStore, PublicStudyStore>();
+builder.Services.AddScoped<PublicStudyService>();
+builder.Services.AddSingleton<ISampleQuizTickets, SampleQuizTickets>();
+builder.Services.AddSingleton<PublicSiteUrls>();
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<IAdConfigService, AdConfigService>();
+builder.Services.AddScoped<AdPageRendering>();
+builder.Services.AddScoped<IAdminAdStore, AdminAdStore>();
+builder.Services.AddScoped<AdminAdService>();
+builder.Services.AddScoped<IAdminReportStore, AdminReportStore>();
+builder.Services.AddScoped<AdminReportService>();
+builder.Services.AddScoped<AdminAuditService>();
+builder.Services.AddScoped<AdminTrafficService>();
+builder.Services.AddSingleton<IDiagramFiles, DiagramFiles>();
+builder.Services.AddSingleton<CsvDownload>();
+builder.Services.AddScoped<IUserVisitStore, UserVisitStore>();
+builder.Services.AddSingleton<VisitQueue>();
+builder.Services.AddHostedService<VisitWriter>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.MapInboundClaims = false;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidIssuer = jwt.Issuer, ValidAudience = jwt.Audience, IssuerSigningKey = jwt.Key,
-        ValidateIssuerSigningKey = true, ClockSkew = TimeSpan.FromSeconds(15)
+        ValidateIssuerSigningKey = true, ClockSkew = TimeSpan.FromSeconds(15), RoleClaimType = ClaimTypes.Role
     };
     options.Events = new JwtBearerEvents
     {
-        OnTokenValidated = context =>
+        OnTokenValidated = async context =>
         {
             if (!int.TryParse(context.Principal?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value, out var id) || id < 1)
-                context.Fail("Invalid student ID.");
-            return Task.CompletedTask;
+            {
+                context.Fail("Invalid account ID.");
+                return;
+            }
+            if (context.Principal!.IsInRole(nameof(UserRole.Admin)) &&
+                !await context.HttpContext.RequestServices.GetRequiredService<IUserStore>()
+                    .IsActiveAdmin(id, context.HttpContext.RequestAborted))
+                context.Fail("The administrator account is inactive or its role has changed.");
         }
     };
 });
 builder.Services.AddAuthorization();
-builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+builder.Services.AddControllersWithViews(options => options.Filters.Add<VisitTrackingFilter>()).AddJsonOptions(options =>
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(namingPolicy: null, allowIntegerValues: false)));
 builder.Services.AddProblemDetails();
 builder.Services.AddRateLimiter(options =>
@@ -61,6 +98,12 @@ builder.Services.AddRateLimiter(options =>
     options.AddPolicy("authentication", context =>
         RateLimitPartition.GetFixedWindowLimiter(context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             _ => new FixedWindowRateLimiterOptions { PermitLimit = 20, Window = TimeSpan.FromMinutes(1) }));
+    options.AddPolicy("sample-quiz", context =>
+        RateLimitPartition.GetFixedWindowLimiter(context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = 30, Window = TimeSpan.FromMinutes(1) }));
+    options.AddPolicy("contact", context =>
+        RateLimitPartition.GetFixedWindowLimiter(context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromHours(1) }));
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -78,7 +121,11 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
+{
     await DatabaseSetup.Initialize(scope.ServiceProvider.GetRequiredService<ExamDb>());
+    await scope.ServiceProvider.GetRequiredService<AdminSeeder>()
+        .Seed(app.Configuration["Admin:Email"], app.Configuration["Admin:Password"]);
+}
 
 app.UseExceptionHandler(handler => handler.Run(async context =>
 {
@@ -110,5 +157,5 @@ app.UseAuthorization();
 app.UseRateLimiter();
 app.MapControllers();
 app.Map("/api/{**unknown}", () => Results.Problem(statusCode: 404));
-app.MapFallback(() => Results.Redirect("/setup"));
+app.MapFallback(() => Results.NotFound());
 app.Run();

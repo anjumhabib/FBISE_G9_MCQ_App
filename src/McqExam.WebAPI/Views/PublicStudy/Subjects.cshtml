@@ -1,0 +1,11 @@
+<div class="page public-page">
+    <header class="public-intro">
+        <h1>Class 9 subject study guides</h1>
+        <p>Review the chapter list and revision tips for each FBISE subject. Each free sample quiz has five questions and shows answers after submission.</p>
+    </header>
+    @await Component.InvokeAsync("AdSlot", new { slotKey = "subject_top_banner" })
+    <section id="sample-quizzes" aria-label="Subject guides and sample quizzes">
+        <partial name="_StudySubjects" />
+    </section>
+    @await Component.InvokeAsync("AdSlot", new { slotKey = "subject_bottom_banner" })
+</div>

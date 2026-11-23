@@ -1,4 +1,5 @@
 import { api, byId, field, letters, renderDiagram, renderFormula, selectButton, session, showMessage } from './site.js';
+import { activateAds } from './ads.js';
 
 const student = session.get()?.user;
 if (student) void init(student);
@@ -203,4 +204,5 @@ async function init(student) {
         clock.querySelector('small').textContent = 'Practice mode';
     }
     byId('exam-toolbar').hidden = byId('exam-layout').hidden = false;
+    void activateAds();
 }

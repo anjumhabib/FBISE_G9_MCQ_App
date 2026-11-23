@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="title">
+  <title id="title">Two-input AND gate and a flowchart decision</title>
+  <rect width="640" height="360" rx="20" fill="#e6f7f7"/>
+  <g stroke="#34796e" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M75 130h82m-82 64h82m130-32h55"/>
+    <path d="M157 100h66a62 62 0 0 1 0 124h-66z" fill="#fff"/>
+    <path d="M460 96l72 61-72 61-72-61z" fill="#c8eee7"/>
+    <path d="M460 65v31m72 61h43v81h-74m-41-20v20"/>
+    <rect x="416" y="238" width="85" height="52" rx="10" fill="#fff"/>
+  </g>
+  <g fill="#255c57" font-family="sans-serif" font-size="18"><text x="182" y="169">AND</text><text x="62" y="118">A</text><text x="62" y="219">B</text><text x="415" y="163">Condition?</text><text x="429" y="270">Action</text></g>
+  <circle cx="460" cy="62" r="10" fill="#7260d5"/>
+</svg>

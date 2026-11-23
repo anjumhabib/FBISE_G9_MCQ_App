@@ -2,6 +2,9 @@ namespace McqExam.Domain;
 
 public enum BloomLevel { Knowledge, Conceptual, Application, Analyzing }
 public enum ExamMode { Exam, Practice }
+public enum UserRole { Student, Admin }
+public enum UserVisitEventType { Login, PageView, ExamStart, ExamSubmit }
+public enum DeviceType { Unknown, Mobile, Desktop, Tablet, Bot }
 
 public sealed class Subject
 {
@@ -42,9 +45,26 @@ public sealed class User
 {
     public int Id { get; set; }
     public string FullName { get; set; } = "";
+    public string? MobileNo { get; set; }
+    public string? SchoolName { get; set; }
     public string Email { get; set; } = "";
     public string PasswordHash { get; set; } = "";
     public DateTime CreatedAt { get; set; }
+    public UserRole Role { get; set; } = UserRole.Student;
+    public bool IsActive { get; set; } = true;
+    public DateTime? LastLoginAt { get; set; }
+}
+
+public sealed class UserVisitLog
+{
+    public int Id { get; set; }
+    public int? UserId { get; set; }
+    public string SessionKey { get; set; } = "";
+    public UserVisitEventType EventType { get; set; }
+    public string Path { get; set; } = "";
+    public string? IpAddress { get; set; }
+    public string? UserAgent { get; set; }
+    public DateTime VisitedAt { get; set; }
 }
 
 public sealed class ExamAttempt
@@ -54,6 +74,7 @@ public sealed class ExamAttempt
     public int SubjectId { get; set; }
     public Subject Subject { get; set; } = null!;
     public ExamMode Mode { get; set; }
+    public DeviceType Device { get; set; }
     public string ChaptersJson { get; set; } = "";
     public string? BloomFilter { get; set; }
     public int TotalQuestions { get; set; }

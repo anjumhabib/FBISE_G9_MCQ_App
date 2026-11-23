@@ -1,5 +1,6 @@
 import { api, byId, clone, duration, field, formatDate, letters, renderBloom, renderDiagram,
     renderFormula, selectButton, session, showMessage } from './site.js';
+import { activateAds, refreshAds } from './ads.js';
 
 if (session.get()) void load();
 
@@ -20,21 +21,45 @@ async function load() {
             const status = item.selectedOption === null ? 'Skipped' : item.isCorrect ? 'Correct' : 'Incorrect Only';
             return { status, node: makeCard(item, status) };
         });
+        const list = byId('review-questions');
+        const ads = insertReviewCards(list, cards);
 
         function update(filter) {
             for (const button of buttons) selectButton(button, button.textContent === filter);
-            const visible = cards.filter(card => filter === 'All' || card.status === filter);
-            byId('review-questions').replaceChildren(...visible.map(card => card.node));
-            byId('review-questions').hidden = visible.length === 0;
-            byId('empty-review').hidden = visible.length > 0;
+            let hasQuestions = false;
+            for (const card of cards) {
+                card.node.hidden = filter !== 'All' && card.status !== filter;
+                hasQuestions ||= !card.node.hidden;
+            }
+            for (const ad of ads) ad.toggleAttribute('data-ad-inactive', filter !== 'All');
+            list.hidden = !hasQuestions;
+            byId('empty-review').hidden = hasQuestions;
+            refreshAds();
         }
 
         for (const button of buttons) button.addEventListener('click', () => update(button.textContent));
         update('All');
         for (const id of ['score-summary', 'review-bloom', 'question-review']) byId(id).hidden = false;
+        void activateAds();
     } catch (error) {
         showMessage(byId('review-error'), error.message);
     } finally { byId('loading-review').hidden = true; }
+}
+
+function insertReviewCards(list, cards) {
+    const template = document.querySelector('template[data-ad-infeed]');
+    const interval = Number(template?.dataset.interval);
+    const ads = [];
+    for (const [index, card] of cards.entries()) {
+        list.append(card.node);
+        const position = index + 1;
+        if (template && Number.isInteger(interval) && interval > 0 && position < cards.length && position % interval === 0) {
+            const ad = template.content.firstElementChild.cloneNode(true);
+            ads.push(ad);
+            list.append(ad);
+        }
+    }
+    return ads;
 }
 
 function makeCard(item, status) {

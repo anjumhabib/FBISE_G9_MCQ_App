@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="title">
+  <title id="title">Plant cell and DNA</title>
+  <rect width="640" height="360" rx="20" fill="#e8f8ef"/>
+  <rect x="64" y="69" width="312" height="221" rx="44" fill="#d2f4e4" stroke="#207c64" stroke-width="8"/>
+  <rect x="79" y="84" width="282" height="191" rx="31" fill="none" stroke="#4bba94" stroke-width="4"/>
+  <path d="M205 116q61-20 104 14v79q-42 45-105 16-39-20-36-62 2-35 37-47z" fill="#c9e6fa"/>
+  <circle cx="131" cy="190" r="34" fill="#a998ec" stroke="#7058b6" stroke-width="4"/>
+  <circle cx="137" cy="182" r="11" fill="#7058b6"/>
+  <g fill="#72cc9d" stroke="#237c64" stroke-width="3"><ellipse cx="110" cy="125" rx="20" ry="10"/><ellipse cx="296" cy="106" rx="20" ry="10"/><ellipse cx="300" cy="247" rx="20" ry="10"/></g>
+  <g fill="none" stroke-width="6" stroke-linecap="round">
+    <path d="M455 60C585 102 455 142 455 181S585 261 455 302" stroke="#6854c5"/>
+    <path d="M535 60C405 102 535 142 535 181S405 261 535 302" stroke="#229e83"/>
+    <path d="M478 74h34m-63 36h92m-75 39h56m-67 64h80m-86 40h92m-66 34h40" stroke="#6591aa" stroke-width="3"/>
+  </g>
+</svg>

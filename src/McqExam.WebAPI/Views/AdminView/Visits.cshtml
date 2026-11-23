@@ -1,0 +1,34 @@
+<section class="kpi-grid" aria-label="Traffic metrics">
+    <div class="card kpi"><span>Visits</span><strong id="visits-total"></strong><small id="visits-devices"></small></div>
+    <div class="card kpi"><span>Logins</span><strong id="visits-logins"></strong></div>
+    <div class="card kpi"><span>Peak hour (UTC)</span><strong id="visits-peak-hour"></strong><small id="visits-peak-hour-count"></small></div>
+    <div class="card kpi"><span>Busiest weekday (UTC)</span><strong id="visits-peak-day"></strong><small id="visits-peak-day-count"></small></div>
+</section>
+<div class="admin-chart-grid">
+    <section class="card report-card admin-chart-card" aria-labelledby="daily-visits-title">
+        <h2 id="daily-visits-title">Daily unique visitors</h2>
+        <div id="visits-daily"></div>
+    </section>
+    <section class="card report-card admin-chart-card" aria-labelledby="hourly-visits-title">
+        <h2 id="hourly-visits-title">Visits by hour (UTC)</h2>
+        <div id="visits-hourly"></div>
+    </section>
+</div>
+<div class="admin-chart-grid">
+    <section class="card report-card admin-table-card" aria-labelledby="weekday-visits-title">
+        <h2 id="weekday-visits-title">Visits by weekday (UTC)</h2>
+        <div id="visits-weekdays"></div>
+    </section>
+    <section class="card report-card admin-table-card" aria-labelledby="active-students-title">
+        <h2 id="active-students-title">Top active students</h2>
+        <div id="visits-students"></div>
+    </section>
+</div>
+<section class="card report-card admin-table-card" aria-labelledby="visit-log-title">
+    <h2 id="visit-log-title">Visit log</h2>
+    <div id="visits-table"></div>
+    <div id="visits-pages"></div>
+</section>
+@section Scripts {
+    <script type="module" src="~/js/admin/visits.js" asp-append-version="true"></script>
+}

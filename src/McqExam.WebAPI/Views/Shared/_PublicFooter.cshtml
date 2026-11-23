@@ -1,0 +1,15 @@
+<footer class="public-footer screen-only">
+    <div class="public-footer-inner">
+        <div><strong>FBISE 9th MCQ Bank</strong><p class="muted">Independent Class 9 practice</p></div>
+        <nav aria-label="Site information">
+            <a href="/about">About</a><a href="/contact">Contact</a>
+            <a href="/privacy-policy">Privacy Policy</a><a href="/terms">Terms</a>
+        </nav>
+        <nav aria-label="Subject guides">
+            @foreach (var subject in McqExam.WebAPI.PublicStudyCatalog.Subjects)
+            {
+                <a href="/subjects/@subject.Slug">@subject.Name</a>
+            }
+        </nav>
+    </div>
+</footer>

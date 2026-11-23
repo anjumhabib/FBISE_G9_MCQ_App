@@ -1,0 +1,62 @@
+@{
+    var page = (string?)ViewData["AdminPage"];
+}
+<form id="admin-filters" class="card report-card admin-filters screen-only" aria-label="Report filters">
+    <div class="admin-fields">
+        <label>From (UTC)<input type="date" name="fromDate"></label>
+        <label>To (UTC)<input type="date" name="toDate"></label>
+        <label>Subject
+            <select name="subjectId"><option value="">All subjects</option></select>
+        </label>
+        <label>Chapter
+            <select name="chapterId"><option value="">All chapters</option></select>
+        </label>
+        <label>Device
+            <select name="device">
+                <option value="">All devices</option><option>Mobile</option><option>Desktop</option>
+                <option>Tablet</option><option>Bot</option><option>Unknown</option>
+            </select>
+        </label>
+        <label class="admin-search">Search<input type="search" name="search" maxlength="250"></label>
+    </div>
+    @if (page == "students")
+    {
+        <div class="admin-fields admin-fields-extra" id="student-inactive-filter" hidden>
+            <label>Time since last login
+                <select name="inactiveDays"><option value="7">7 days</option><option value="14">14 days</option><option value="30">30 days</option></select>
+            </label>
+        </div>
+    }
+    @if (page == "questions")
+    {
+        <div class="admin-fields admin-fields-extra">
+            <label>Bloom’s level
+                <select name="bloomLevel">
+                    <option value="">All levels</option><option>Knowledge</option><option>Conceptual</option>
+                    <option>Application</option><option>Analyzing</option>
+                </select>
+            </label>
+            <label>Maximum accuracy (%)
+                <input type="number" min="0" max="100" step="any" name="maxAccuracy">
+            </label>
+            <label class="admin-check"><input type="checkbox" name="suspectedWrongKey" value="true"> Suspected wrong-key</label>
+            <label class="admin-check"><input type="checkbox" name="neverAttempted" value="true"> Never attempted</label>
+        </div>
+    }
+    @if (page == "visits")
+    {
+        <div class="admin-fields admin-fields-extra">
+            <label>Event
+                <select name="eventType">
+                    <option value="">All events</option><option value="Login">Login</option><option value="PageView">Page view</option>
+                    <option value="ExamStart">Exam start</option><option value="ExamSubmit">Exam submission</option>
+                </select>
+            </label>
+            <label>Student ID<input type="number" name="studentId" min="1" max="2147483647" step="1"></label>
+        </div>
+    }
+    <div class="admin-actions">
+        <button type="submit" class="button primary">Apply</button>
+        <button type="reset" class="button secondary">Reset</button>
+    </div>
+</form>

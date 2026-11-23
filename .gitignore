@@ -27,6 +27,9 @@ src/McqExam.WebAPI/wwwroot/*
 !src/McqExam.WebAPI/wwwroot/css/
 !src/McqExam.WebAPI/wwwroot/js/
 !src/McqExam.WebAPI/wwwroot/vendor/
+!src/McqExam.WebAPI/wwwroot/images/
+src/McqExam.WebAPI/wwwroot/images/*
+!src/McqExam.WebAPI/wwwroot/images/public/
 src/McqExam.WebAPI/App_Data/*
 !src/McqExam.WebAPI/App_Data/.gitkeep
 .npm-local/

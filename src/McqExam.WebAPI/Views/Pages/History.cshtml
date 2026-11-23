@@ -20,6 +20,7 @@
         <div id="score-chart" class="chart" hidden><canvas id="plot" role="img" aria-label="Line chart of recent scores. Score values are listed in Attempt History."></canvas></div>
         <p id="empty-chart" class="empty-inline" hidden>Complete a test to see your scores here.</p>
     </section>
+    @await Component.InvokeAsync("AdSlot", new { slotKey = "history_mid_banner" })
     <section id="attempt-history" class="card report-card history-table" hidden>
         <div class="section-heading-row"><h2>Attempt History</h2><span id="history-tests" class="badge slate"></span></div>
         <div id="history-table" class="table-scroll" tabindex="0" role="region" aria-label="Attempt history table" hidden>

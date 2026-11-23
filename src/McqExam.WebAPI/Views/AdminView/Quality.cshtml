@@ -1,0 +1,14 @@
+<section class="card report-card admin-table-card" aria-labelledby="quality-title">
+    <div class="pills screen-only" role="group" aria-label="Quality report">
+        <button type="button" class="pill active" data-report-tab="duplicates" aria-pressed="true">Duplicate questions</button>
+        <button type="button" class="pill" data-report-tab="media" aria-pressed="false">Broken diagrams / data audit</button>
+        <button type="button" class="pill" data-report-tab="anomalies" aria-pressed="false">Abandoned / fast guessing</button>
+    </div>
+    <h2 id="quality-title" class="admin-tab-title">Duplicate questions</h2>
+    <p id="quality-description" class="muted" hidden></p>
+    <div id="quality-results"></div>
+    <div id="quality-pages"></div>
+</section>
+@section Scripts {
+    <script type="module" src="~/js/admin/quality.js" asp-append-version="true"></script>
+}

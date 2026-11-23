@@ -31,7 +31,9 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
         session.set(null);
         location.replace(session.loginUrl());
     }
-    const message = response.status === 429 ? 'Too many sign-in attempts. Please wait a minute and try again.'
+    const message = response.status === 429
+        ? (authRequest ? 'Too many sign-in attempts. Please wait a minute and try again.'
+            : 'Too many requests. Please wait a moment and try again.')
         : data?.detail || (data?.errors && Object.values(data.errors).flat().join(' '))
         || 'Something went wrong. Please try again.';
     throw Object.assign(new Error(message), { status: response.status });
@@ -94,6 +96,17 @@ export function localUrl(value) {
         const url = new URL(value, location.origin);
         return url.origin === location.origin ? url : null;
     } catch { return null; }
+}
+
+export function isAdminSession(value = session.get()) {
+    try {
+        const payload = value.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const claims = JSON.parse(atob(payload));
+        // This controls navigation only. The API independently validates the role and account.
+        return claims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] === 'Admin';
+    } catch {
+        return false;
+    }
 }
 
 export function renderBloom(container, items) {

@@ -17,6 +17,266 @@ namespace McqExam.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.34");
 
+            modelBuilder.Entity("McqExam.Domain.AdGlobalSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("AdsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("AdsTxtContent")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("AutoAdsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("InFeedInterval")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(6);
+
+                    b.Property<bool>("PreviewPlaceholderMode")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("PublisherId")
+                        .HasMaxLength(23)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AdGlobalSettings", t =>
+                        {
+                            t.HasCheckConstraint("CK_AdGlobalSettings_Singleton", "Id = 1");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AdsEnabled = false,
+                            AutoAdsEnabled = false,
+                            InFeedInterval = 6,
+                            PreviewPlaceholderMode = false,
+                            UpdatedAt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
+                });
+
+            modelBuilder.Entity("McqExam.Domain.AdPlacement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AdFormat")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AdSlotId")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("HideOnDesktop")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("HideOnMobile")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("MinHeightPx")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PageKey")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SlotKey")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SlotKey")
+                        .IsUnique();
+
+                    b.ToTable("AdPlacements");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AdFormat = "ResponsiveBanner",
+                            Description = "Between the subject cards and the SLO assessment overview.",
+                            DisplayName = "Home mid-page banner",
+                            HideOnDesktop = false,
+                            HideOnMobile = false,
+                            IsEnabled = true,
+                            MinHeightPx = 100,
+                            PageKey = "PublicHome",
+                            SlotKey = "home_mid_banner",
+                            UpdatedAt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AdFormat = "ResponsiveBanner",
+                            Description = "Below the subject introduction and above the chapter breakdown.",
+                            DisplayName = "Subject guide top banner",
+                            HideOnDesktop = false,
+                            HideOnMobile = false,
+                            IsEnabled = true,
+                            MinHeightPx = 100,
+                            PageKey = "PublicSubjectGuide",
+                            SlotKey = "subject_top_banner",
+                            UpdatedAt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AdFormat = "ResponsiveBanner",
+                            Description = "Below the study tips and sample quiz links.",
+                            DisplayName = "Subject guide bottom banner",
+                            HideOnDesktop = false,
+                            HideOnMobile = false,
+                            IsEnabled = true,
+                            MinHeightPx = 100,
+                            PageKey = "PublicSubjectGuide",
+                            SlotKey = "subject_bottom_banner",
+                            UpdatedAt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 4,
+                            AdFormat = "ResponsiveBanner",
+                            Description = "Between the exam strategy and the Bloom’s level examples.",
+                            DisplayName = "SLO guide mid-page banner",
+                            HideOnDesktop = false,
+                            HideOnMobile = false,
+                            IsEnabled = true,
+                            MinHeightPx = 100,
+                            PageKey = "PublicSloGuide",
+                            SlotKey = "slo_mid_banner",
+                            UpdatedAt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 5,
+                            AdFormat = "ResponsiveBanner",
+                            Description = "Below the sample quiz content, separate from quiz controls.",
+                            DisplayName = "Sample quiz bottom banner",
+                            HideOnDesktop = false,
+                            HideOnMobile = false,
+                            IsEnabled = true,
+                            MinHeightPx = 100,
+                            PageKey = "SampleQuiz",
+                            SlotKey = "sample_quiz_bottom",
+                            UpdatedAt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 6,
+                            AdFormat = "ResponsiveBanner",
+                            Description = "Below the test setup card, separate from the Start Test button.",
+                            DisplayName = "Test setup bottom banner",
+                            HideOnDesktop = false,
+                            HideOnMobile = false,
+                            IsEnabled = true,
+                            MinHeightPx = 100,
+                            PageKey = "TestSetup",
+                            SlotKey = "setup_bottom_banner",
+                            UpdatedAt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 7,
+                            AdFormat = "SidebarRectangle",
+                            Description = "Below the Question Navigator on desktop, separate from exam controls and answers.",
+                            DisplayName = "Exam desktop sidebar",
+                            HideOnDesktop = false,
+                            HideOnMobile = true,
+                            IsEnabled = true,
+                            MinHeightPx = 250,
+                            PageKey = "ExamRunner",
+                            SlotKey = "exam_desktop_sidebar",
+                            UpdatedAt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 8,
+                            AdFormat = "ResponsiveBanner",
+                            Description = "Below the Bloom’s level summary and above the question review.",
+                            DisplayName = "Answer review top banner",
+                            HideOnDesktop = false,
+                            HideOnMobile = false,
+                            IsEnabled = true,
+                            MinHeightPx = 100,
+                            PageKey = "AnswerReview",
+                            SlotKey = "review_top_banner",
+                            UpdatedAt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 9,
+                            AdFormat = "InFeedNative",
+                            Description = "Between complete reviewed question cards at the configured interval.",
+                            DisplayName = "Answer review in-feed",
+                            HideOnDesktop = false,
+                            HideOnMobile = false,
+                            IsEnabled = true,
+                            MinHeightPx = 250,
+                            PageKey = "AnswerReview",
+                            SlotKey = "review_infeed",
+                            UpdatedAt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = 10,
+                            AdFormat = "ResponsiveBanner",
+                            Description = "Between the score trend chart and attempt history.",
+                            DisplayName = "History mid-page banner",
+                            HideOnDesktop = false,
+                            HideOnMobile = false,
+                            IsEnabled = true,
+                            MinHeightPx = 100,
+                            PageKey = "HistoryReport",
+                            SlotKey = "history_mid_banner",
+                            UpdatedAt = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
+                });
+
             modelBuilder.Entity("McqExam.Domain.Chapter", b =>
                 {
                     b.Property<int>("Id")
@@ -39,6 +299,35 @@ namespace McqExam.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Chapters");
+                });
+
+            modelBuilder.Entity("McqExam.Domain.ContactInquiry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ContactInquiries");
                 });
 
             modelBuilder.Entity("McqExam.Domain.ExamAnswer", b =>
@@ -101,6 +390,12 @@ namespace McqExam.Infrastructure.Migrations
 
                     b.Property<int>("CorrectCount")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Device")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Unknown");
 
                     b.Property<string>("Mode")
                         .IsRequired()
@@ -265,8 +560,30 @@ namespace McqExam.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime?>("LastLoginAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MobileNo")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Student");
+
+                    b.Property<string>("SchoolName")
+                        .HasMaxLength(150)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -275,6 +592,47 @@ namespace McqExam.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("McqExam.Domain.UserVisitLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SessionKey")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("VisitedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventType");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("VisitedAt");
+
+                    b.ToTable("UserVisitLogs");
                 });
 
             modelBuilder.Entity("McqExam.Domain.Chapter", b =>
@@ -329,6 +687,14 @@ namespace McqExam.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Chapter");
+                });
+
+            modelBuilder.Entity("McqExam.Domain.UserVisitLog", b =>
+                {
+                    b.HasOne("McqExam.Domain.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("McqExam.Domain.Chapter", b =>

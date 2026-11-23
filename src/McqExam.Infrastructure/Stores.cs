@@ -10,6 +10,9 @@ public sealed class UserStore(ExamDb db) : IUserStore
     public Task<User?> Find(string email, CancellationToken ct) =>
         db.Users.AsNoTracking().SingleOrDefaultAsync(x => x.Email == email, ct);
 
+    public Task<bool> IsActiveAdmin(int id, CancellationToken ct) =>
+        db.Users.AnyAsync(x => x.Id == id && x.Role == UserRole.Admin && x.IsActive, ct);
+
     public async Task<bool> Create(User user, CancellationToken ct)
     {
         db.Users.Add(user);
@@ -35,9 +38,9 @@ public sealed class ExamStore(ExamDb db) : IExamStore
 {
     public async Task<IReadOnlyList<SubjectInfo>> Subjects(CancellationToken ct) =>
         await db.Subjects.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.Id)
-            .Select(x => new SubjectInfo(x.Id, x.Name, x.Code, x.Chapters.Sum(c => c.Questions.Count),
+            .Select(x => new SubjectInfo(x.Id, x.Name, x.Code,
                 x.Chapters.OrderBy(c => c.ChapterNo)
-                    .Select(c => new ChapterInfo(c.Id, c.ChapterNo, c.Title, c.Questions.Count)).ToArray()))
+                    .Select(c => new ChapterInfo(c.Id, c.ChapterNo, c.Title)).ToArray()))
             .ToListAsync(ct);
 
     public async Task<bool> ValidFilter(ExamFilter filter, CancellationToken ct) =>
@@ -47,8 +50,6 @@ public sealed class ExamStore(ExamDb db) : IExamStore
     private IQueryable<Question> Matching(ExamFilter filter) => db.Questions.Where(x =>
         x.Chapter.SubjectId == filter.SubjectId && filter.ChapterIds.Contains(x.ChapterId) &&
         (filter.BloomLevel == null || x.BloomLevel == filter.BloomLevel) && (filter.IncludeDiagrams || !x.HasDiagram));
-
-    public Task<int> Count(ExamFilter filter, CancellationToken ct) => Matching(filter).CountAsync(ct);
 
     public Task<List<Question>> Select(int userId, ExamFilter filter, int count, CancellationToken ct)
     {

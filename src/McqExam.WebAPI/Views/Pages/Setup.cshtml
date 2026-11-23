@@ -39,13 +39,13 @@
                 </div>
             </fieldset>
             <fieldset>
-                <legend>Number of Questions</legend>
+                <legend>Test length (questions)</legend>
                 <div id="count-presets" class="pills">
                     @foreach (var count in new[] { 10, 15, 20, 30 })
                     {
                         <button type="button" class="pill" data-count="@count" aria-pressed="false">@count</button>
                     }
-                    <input id="custom-count" class="custom-count" type="number" min="1" max="200" step="1" value="10" aria-label="Custom number of questions">
+                    <input id="custom-count" class="custom-count" type="number" min="1" max="200" step="1" value="10" aria-label="Custom test length" required>
                 </div>
             </fieldset>
         </div>
@@ -63,27 +63,24 @@
             </div>
         </fieldset>
         <label class="diagrams-toggle"><input id="include-diagrams" type="checkbox" checked> Include Diagram Questions</label>
-        <p id="match-error" class="alert" role="alert" hidden></p>
         <p id="start-error" class="alert" role="alert" hidden></p>
         <div class="setup-actions">
-            <span role="status"><span id="match-message"></span><strong id="match-count" hidden></strong><span id="match-label" hidden> matching questions</span>
-                <small id="count-warning" hidden>Choose fewer questions or broaden the filters.</small></span>
+            <span id="setup-hint" role="status" hidden></span>
             <button id="start-button" class="button primary" type="submit" disabled>Start Test</button>
         </div>
     </form>
+    @await Component.InvokeAsync("AdSlot", new { slotKey = "setup_bottom_banner" })
 </div>
 <template id="subject-template">
     <button class="subject-card" type="button">
         <span class="subject-icon" data-field="icon" aria-hidden="true"></span>
         <strong data-field="name"></strong>
-        <span class="subject-count" data-field="count"></span>
     </button>
 </template>
 <template id="chapter-template">
     <label class="chapter">
         <input type="checkbox">
         <span><small data-field="number"></small><strong data-field="title"></strong></span>
-        <span class="chapter-count" data-field="count"></span>
     </label>
 </template>
 @section Scripts {

@@ -31,7 +31,7 @@
 
     window.mcqSession = { get, set, read, write, loginUrl };
 
-    if (!get() && !['/login', '/register'].includes(location.pathname.toLowerCase().replace(/\/$/, ''))) {
+    if (document.currentScript.dataset.protected === 'true' && !get()) {
         document.documentElement.classList.add('redirecting');
         location.replace(loginUrl());
     }

@@ -1,0 +1,58 @@
+@model McqExam.WebAPI.StudyGuide
+<div class="page public-page">
+    <a href="/subjects">All subjects</a>
+    <header class="card report-card public-feature">
+        <div class="public-intro">
+            <h1>Class 9 @Model.Subject.Name study guide</h1>
+            <p>@Model.Subject.Description</p>
+            <div class="public-actions">
+                <a class="button primary" href="/sample-quiz/@Model.Subject.Slug">Try five sample questions</a>
+                <a class="button secondary" href="/login?returnUrl=/setup">Sign in for custom tests</a>
+            </div>
+        </div>
+        <img src="@Model.Subject.Image" alt="@Model.Subject.ImageAlt" width="640" height="360" asp-append-version="true">
+    </header>
+    @await Component.InvokeAsync("AdSlot", new { slotKey = "subject_top_banner" })
+    <div class="public-feature public-top">
+        <section class="card report-card public-copy">
+            <h2>Chapters in the practice bank</h2>
+            @if (Model.Chapters.Count == 0)
+            {
+                <p class="muted">Chapters will appear here after the question bank is imported.</p>
+            }
+            else
+            {
+                <ol class="public-chapters">
+                    @foreach (var chapter in Model.Chapters)
+                    {
+                        <li value="@chapter.ChapterNo">@chapter.Title</li>
+                    }
+                </ol>
+            }
+            <p>For the official syllabus and assessment framework, consult the <a href="@McqExam.WebAPI.PublicStudyCatalog.Frameworks">FBISE curriculum and model papers</a>.</p>
+        </section>
+        <section class="card report-card public-copy">
+            <h2>Bloom’s level distribution</h2>
+            <p class="muted">Approximate share of practice material by skill.</p>
+            @if (Model.Bloom.Count == 0)
+            {
+                <p class="muted">Distribution will appear after questions are imported.</p>
+            }
+            @foreach (var level in Model.Bloom)
+            {
+                <div class="public-progress">
+                    <div><strong>@level.Level</strong><span>@(level.Percent)%</span></div>
+                    <progress max="100" value="@level.Percent" aria-label="@level.Level"></progress>
+                </div>
+            }
+        </section>
+    </div>
+    <section class="card report-card public-copy">
+        <h2>How to revise @Model.Subject.Name</h2>
+        @foreach (var tip in Model.Subject.Tips)
+        {
+            <h3>@tip.Heading</h3><p>@tip.Text</p>
+        }
+    </section>
+    @await Component.InvokeAsync("AdSlot", new { slotKey = "subject_bottom_banner" })
+</div>

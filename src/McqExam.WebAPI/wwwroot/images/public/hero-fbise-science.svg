@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="title">
+  <title id="title">An open science notebook with a cell and a motion graph</title>
+  <rect width="640" height="360" rx="20" fill="#eef2ff"/>
+  <circle cx="540" cy="72" r="46" fill="#dedbff"/>
+  <circle cx="105" cy="274" r="42" fill="#e0f5ee"/>
+  <path d="M76 124 Q186 86 320 143 Q454 86 564 124 V281 Q443 256 320 306 Q197 256 76 281Z" fill="#d5d5fa" stroke="#5148ae" stroke-width="5"/>
+  <path d="M95 102 Q217 77 320 135 Q423 77 545 102 V259 Q427 240 320 291 Q213 240 95 259Z" fill="#fff" stroke="#5148ae" stroke-width="5"/>
+  <path d="M320 135V291" stroke="#5148ae" stroke-width="5"/>
+  <g transform="translate(135 139)" stroke="#238878" stroke-width="5">
+    <path d="M0 21Q0 0 25 0h98q25 0 25 23v63q0 23-25 23H25Q0 109 0 86Z" fill="#dbf8ea"/>
+    <circle cx="44" cy="59" r="17" fill="#aba5f8"/><ellipse cx="102" cy="34" rx="15" ry="8" fill="#79d3ad"/>
+    <ellipse cx="102" cy="78" rx="15" ry="8" fill="#79d3ad"/>
+  </g>
+  <path d="M369 234V131m0 103h130M384 216l28-28 27 6 43-46" fill="none" stroke="#6b53d3" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="482" cy="148" r="8" fill="#f8b857"/>
+  <path d="M307 56h26m-13-13v26m181 240h20m-10-10v20M137 71h24m-12-12v24" stroke="#8b7be6" stroke-width="4" stroke-linecap="round"/>
+</svg>

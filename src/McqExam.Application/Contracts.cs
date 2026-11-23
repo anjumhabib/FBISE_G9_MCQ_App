@@ -6,14 +6,16 @@ namespace McqExam.Application;
 public sealed record RegisterRequest(
     [Required, StringLength(100, MinimumLength = 2)] string FullName,
     [Required, EmailAddress, StringLength(254)] string Email,
-    [Required, StringLength(72, MinimumLength = 8)] string Password);
+    [Required, StringLength(72, MinimumLength = 8)] string Password,
+    [Required, StringLength(32)] string MobileNo,
+    [Required, StringLength(150)] string SchoolName);
 public sealed record LoginRequest(
     [Required, EmailAddress, StringLength(254)] string Email,
     [Required, StringLength(72)] string Password);
 public sealed record Profile(int Id, string FullName, string Email);
 public sealed record AuthSession(string Token, Profile User, DateTime ExpiresAt);
-public sealed record ChapterInfo(int Id, int ChapterNo, string Title, int QuestionCount);
-public sealed record SubjectInfo(int Id, string Name, string Code, int QuestionCount, IReadOnlyList<ChapterInfo> Chapters);
+public sealed record ChapterInfo(int Id, int ChapterNo, string Title);
+public sealed record SubjectInfo(int Id, string Name, string Code, IReadOnlyList<ChapterInfo> Chapters);
 public class ExamFilter
 {
     [Range(1, int.MaxValue)] public int SubjectId { get; init; }

@@ -1,4 +1,5 @@
 import { api, byId, clone, field, selectButton, session, showMessage } from './site.js';
+import { activateAds } from './ads.js';
 
 if (session.get()) init();
 
@@ -14,11 +15,9 @@ function init() {
     const filters = [...byId('bloom-filters').querySelectorAll('button')];
     const presets = [...byId('count-presets').querySelectorAll('button')];
     const modes = [...byId('mode-field').querySelectorAll('input')];
-    let subject, matchRequest, debounce;
+    let subject;
     let selected = new Set();
     let bloomLevel = null;
-    let matching = null;
-    let countError = '';
     let starting = false;
 
     function currentFilter() {
@@ -26,43 +25,19 @@ function init() {
             includeDiagrams: diagrams.checked } : null;
     }
 
-    function updateMatches() {
+    function updateSetup() {
         const count = Number(countInput.value);
-        const hasCount = matching !== null;
-        const label = !currentFilter() ? 'Select chapters to see matching questions.'
-            : countError ? 'Question count unavailable.' : 'Checking available questions…';
-        showMessage(byId('match-message'), hasCount ? '' : label);
-        const result = byId('match-count');
-        result.textContent = matching ?? '';
-        result.hidden = !hasCount;
-        byId('match-label').hidden = !hasCount;
-        byId('count-warning').hidden = !hasCount || count <= matching;
-        showMessage(byId('match-error'), countError);
-        startButton.disabled = starting || !countInput.validity.valid || !Number.isInteger(count)
-            || count < 1 || !hasCount || count > matching;
+        const validLength = countInput.validity.valid;
+        showMessage(byId('setup-hint'), !selected.size ? 'Select at least one chapter to start a test.'
+            : !validLength ? 'Enter a test length from 1 to 200 questions.' : '');
+        startButton.disabled = starting || !selected.size || !validLength;
         for (const preset of presets) selectButton(preset, Number(preset.dataset.count) === count);
         for (const filter of filters) selectButton(filter, filter.dataset.level === (bloomLevel ?? 'All'));
     }
 
-    function requestCount() {
-        clearTimeout(debounce);
-        matchRequest?.abort();
-        matching = null;
-        countError = '';
-        updateMatches();
-        const filter = currentFilter();
-        if (!filter) return;
-        const request = new AbortController();
-        matchRequest = request;
-        debounce = setTimeout(async () => {
-            try {
-                const result = await api('/api/exams/count', { method: 'POST', body: filter, signal: request.signal });
-                if (!request.signal.aborted) matching = result.count;
-            } catch (error) {
-                if (!request.signal.aborted) countError = error.message;
-            }
-            if (!request.signal.aborted) updateMatches();
-        }, 160);
+    function settingsChanged() {
+        showMessage(byId('start-error'));
+        updateSetup();
     }
 
     function updateChapters() {
@@ -72,7 +47,7 @@ function init() {
         }
         byId('chapter-summary').textContent = subject.name + ' · ' + selected.size + ' selected';
         toggleAll.textContent = selected.size === subject.chapters.length ? 'Deselect All' : 'Select All';
-        requestCount();
+        settingsChanged();
     }
 
     function selectSubject(item) {
@@ -92,7 +67,6 @@ function init() {
             input.value = chapter.id;
             field(label, 'number').textContent = 'Chapter ' + chapter.chapterNo;
             field(label, 'title').textContent = chapter.title;
-            field(label, 'count').textContent = chapter.questionCount + ' MCQs';
             input.addEventListener('change', () => {
                 if (input.checked) selected.add(chapter.id);
                 else selected.delete(chapter.id);
@@ -102,7 +76,6 @@ function init() {
         }));
         byId('setup-chapters').hidden = false;
         form.hidden = false;
-        showMessage(byId('start-error'));
         updateChapters();
     }
 
@@ -119,14 +92,16 @@ function init() {
                 icon.dataset.subject = item.code;
                 icon.textContent = icons[item.code] ?? '';
                 field(button, 'name').textContent = item.name;
-                field(button, 'count').textContent = item.questionCount + ' MCQs';
                 button.addEventListener('click', () => selectSubject(item));
                 return button;
             }));
             byId('setup-subjects').hidden = subjects.length === 0;
             byId('empty-subjects').hidden = subjects.length > 0;
-            const first = subjects.find(item => item.questionCount > 0) ?? subjects[0];
-            if (first) selectSubject(first);
+            const first = subjects.find(item => item.chapters.length > 0) ?? subjects[0];
+            if (first) {
+                selectSubject(first);
+                void activateAds();
+            }
         } catch (error) {
             showMessage(byId('setup-error'), error.message);
             byId('empty-subjects').hidden = false;
@@ -138,16 +113,16 @@ function init() {
         selected = new Set(selected.size === subject.chapters.length ? [] : subject.chapters.map(chapter => chapter.id));
         updateChapters();
     });
-    diagrams.addEventListener('change', requestCount);
-    countInput.addEventListener('input', updateMatches);
+    diagrams.addEventListener('change', settingsChanged);
+    countInput.addEventListener('input', settingsChanged);
 
     for (const filter of filters) filter.addEventListener('click', () => {
         bloomLevel = filter.dataset.level === 'All' ? null : filter.dataset.level;
-        requestCount();
+        settingsChanged();
     });
     for (const preset of presets) preset.addEventListener('click', () => {
         countInput.value = preset.dataset.count;
-        updateMatches();
+        settingsChanged();
     });
     for (const mode of modes) mode.addEventListener('change', () => {
         for (const input of modes) input.closest('label').classList.toggle('selected', input.checked);
@@ -159,7 +134,7 @@ function init() {
         starting = true;
         startButton.textContent = 'Starting…';
         showMessage(byId('start-error'));
-        updateMatches();
+        updateSetup();
         try {
             const body = { ...currentFilter(), questionCount: Number(countInput.value), mode: modes.find(input => input.checked).value };
             const attempt = await api('/api/exams/start', { method: 'POST', body });
@@ -169,7 +144,7 @@ function init() {
         } finally {
             starting = false;
             startButton.textContent = 'Start Test';
-            updateMatches();
+            updateSetup();
         }
     });
 

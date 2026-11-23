@@ -1,0 +1,40 @@
+<div class="page public-page public-article">
+    <header class="public-intro">
+        <h1>FBISE SLO and Bloom’s Taxonomy guide</h1>
+        <p>A practical guide to preparing for the SSC-I objective paper and studying the skills behind the questions.</p>
+    </header>
+    <article class="card report-card public-copy">
+        <h2>What is a Student Learning Outcome?</h2>
+        <p>A Student Learning Outcome, or SLO, describes something you should be able to do after studying a topic. An outcome about motion might ask you to interpret a graph. Reading a definition is preparation, but demonstrating the outcome means using the graph to explain how an object moves.</p>
+        <p>In the FBISE assessment framework, check whether an outcome is formative or summative. Formative work helps you develop the skill in class. Summative outcomes are the starting point for final-exam preparation. If a subject has a practical assessment, also check whether an outcome belongs to the theory paper or the practical assessment.</p>
+        <h3>Turn a chapter into a checklist</h3>
+        <p>Pick one outcome and underline its instruction verb. Make a short question that uses the same verb or find an aligned example in a model paper. Try to answer without notes first. If you cannot explain the answer, write down the missing idea and return to it in your next study session.</p>
+        <p>Find the framework and paper for your subject and scheme on the <a href="@McqExam.WebAPI.PublicStudyCatalog.Frameworks">official FBISE model papers page</a>.</p>
+    </article>
+    <section class="card report-card public-feature">
+        <div class="public-copy">
+            <h2>Section A marks and pacing</h2>
+            <p>Section A is the objective section of the model papers. Its weight depends on the subject and the paper scheme. For example, the Board’s Biology SSC-I model gives Section A 12 marks in 20 minutes. A Mathematics SSC-I model gives it 15 marks in 20 minutes. Check the instructions and marks on the model paper for your own scheme.</p>
+            <p>Practise with a target of about one minute per MCQ. Answer straightforward items first, return to questions that need working if the instructions and time allow, then verify your option positions. On a hard question, eliminate answers with impossible units, signs, or conditions before committing to a choice.</p>
+            <p class="public-sources"><a href="https://fbise.edu.pk/ModelPaper/2025/Assessment%20Frameworks/SSC-I/Final%20Assessment%20Framework%20Model%20Question%20Paper%20Biology%20SSC-I.pdf">Biology model paper</a> · <a href="https://www.fbise.edu.pk/ModelPaper/2024New/maths/Final_Assessment_Framework_Model_Question_Paper_Mathematics_SSC-I.pdf">Mathematics model paper</a></p>
+        </div>
+        <img src="~/images/public/fbise-exam-strategy.svg" alt="Three stages of practice: answer, revisit, and verify" width="640" height="360" loading="lazy" asp-append-version="true">
+    </section>
+    @await Component.InvokeAsync("AdSlot", new { slotKey = "slo_mid_banner" })
+    <article class="card report-card public-copy">
+        <h2>Four levels used in this practice bank</h2>
+        <p>FBISE frameworks describe cognitive levels such as Knowledge, Understanding, and Application. This practice bank uses four labels so you can distinguish explanation from recall and isolate questions that ask you to analyze evidence.</p>
+        <div class="public-feature public-top">
+            <dl class="public-levels">
+                <div><dt>Knowledge</dt><dd>Recall a term, rule or fact. For example, name the SI unit of force. Revise by testing recall before looking at the answer choices.</dd></div>
+                <div><dt>Conceptual</dt><dd>Explain why an idea holds or compare situations. For example, explain why a plant cell stays firm when it gains water. Name the structures and explain how they interact.</dd></div>
+                <div><dt>Application</dt><dd>Use a learned rule on new values or conditions. For example, calculate the average speed for 12 metres travelled in four seconds. Write the equation and carry the units through your working.</dd></div>
+                <div><dt>Analyzing</dt><dd>Break down information and use evidence to distinguish explanations. For example, compare two position–time graphs to tell which object moved steadily and which stopped. Cite the slope or a horizontal interval as evidence.</dd></div>
+            </dl>
+            <img src="~/images/public/blooms-pyramid.svg" alt="Knowledge, Conceptual, Application and Analyzing arranged as a study pyramid" width="640" height="360" loading="lazy" asp-append-version="true">
+        </div>
+        <h3>Review mistakes by skill</h3>
+        <p>After each practice set, label a missed question with what went wrong, such as a missing definition, an incorrect unit conversion, or a graph misread. Redo the question without the options. Then change one value or condition and answer again to check that you can transfer the skill.</p>
+        <a class="button primary" href="/subjects#sample-quizzes">Choose a sample quiz</a>
+    </article>
+</div>

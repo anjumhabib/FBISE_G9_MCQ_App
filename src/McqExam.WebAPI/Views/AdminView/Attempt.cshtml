@@ -1,0 +1,44 @@
+<section class="hero result-hero admin-score" aria-label="Score summary">
+    <div class="score-circle"><strong id="attempt-score"></strong><small>Score</small></div>
+    <div class="result-metadata">
+        <span class="hero-label" id="attempt-mode"></span><h2 id="attempt-subject"></h2><p id="attempt-state"></p>
+    </div>
+    <dl>
+        <div><dt>Marks</dt><dd id="attempt-marks"></dd></div>
+        <div><dt>Time taken</dt><dd id="attempt-time"></dd></div>
+    </dl>
+</section>
+<div class="admin-chart-grid">
+    <section class="card report-card" aria-labelledby="attempt-student-title">
+        <div class="admin-section-heading">
+            <h2 id="attempt-student-title">Student details</h2>
+            <a class="button secondary small screen-only" id="attempt-student-link" href="/admin/students">Student report</a>
+        </div>
+        <dl id="attempt-student" class="admin-facts"></dl>
+    </section>
+    <section class="card report-card" aria-labelledby="attempt-details-title">
+        <h2 id="attempt-details-title">Test details</h2>
+        <dl id="attempt-details" class="admin-facts"></dl>
+    </section>
+</div>
+<partial name="_Bloom" />
+<section class="review-section" aria-labelledby="attempt-review-title">
+    <h2 id="attempt-review-title">Question review</h2>
+    <div id="attempt-questions" class="review-section"></div>
+</section>
+<template id="admin-review-card">
+    <article class="card question-card reviewed">
+        <header class="question-top">
+            <h3 data-field="position"></h3>
+            <span class="badge slate" data-field="chapter"></span><span class="badge" data-field="bloom"></span>
+            <span class="badge answer-status" data-field="status"></span>
+        </header>
+        <p class="question-text" data-field="text"></p>
+        <img class="diagram" data-field="diagram" alt="Diagram for this question" hidden>
+        <p class="muted admin-answer-summary" data-field="summary"></p>
+        <div class="option-list" data-field="options"></div>
+    </article>
+</template>
+@section Scripts {
+    <script type="module" src="~/js/admin/attempt.js" asp-append-version="true"></script>
+}

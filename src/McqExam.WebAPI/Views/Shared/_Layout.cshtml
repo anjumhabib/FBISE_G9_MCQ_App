@@ -1,6 +1,10 @@
+@inject McqExam.WebAPI.AdPageRendering AdRendering
 @{
     var page = (string?)ViewData["Page"];
-    var protectedPage = page is not ("login" or "register");
+    var publicPage = ViewData["PublicPage"] is true;
+    var protectedPage = !publicPage && page is not ("login" or "register");
+    var publicAds = publicPage && ViewData["DeferAds"] is not true;
+    var adSettings = await AdRendering.For(Context);
 }
 <!doctype html>
 <html lang="en">
@@ -9,21 +13,44 @@
     <title>@ViewData["Title"] · FBISE 9th MCQ Bank</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f8fafc">
+    @if (publicPage)
+    {
+        <meta name="description" content="@ViewData["Description"]">
+        <link rel="canonical" href="@ViewData["Canonical"]">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="@ViewData["Title"]">
+        <meta property="og:description" content="@ViewData["Description"]">
+        <meta property="og:url" content="@ViewData["Canonical"]">
+        <meta property="og:image" content="@ViewData["SocialImage"]">
+        <meta property="og:site_name" content="FBISE 9th MCQ Bank">
+    }
     <link rel="icon" href="~/favicon.svg">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true">
-    <script src="~/js/session.js" asp-append-version="true"></script>
+    <link rel="stylesheet" href="~/css/public.css" asp-append-version="true">
+    <script src="~/js/session.js" asp-append-version="true" data-protected="@(protectedPage ? "true" : "false")"></script>
+    @if (adSettings is not null)
+    {
+        <meta name="mcq-ad-settings" data-script-url="@adSettings.ScriptUrl"
+              data-auto-load="@(adSettings.AutoLoad ? "true" : "false")"
+              data-admin-preview="@(adSettings.RequireAdminPreview ? "true" : "false")">
+    }
 </head>
-<body data-protected="@(protectedPage ? "true" : "false")" data-attempt-id="@ViewData["AttemptId"]">
+<body data-protected="@(protectedPage ? "true" : "false")" data-attempt-id="@ViewData["AttemptId"]"
+      data-public-ads="@(publicAds ? "true" : "false")">
     <a href="#content" class="skip-link">Skip to content</a>
     <header class="site-header">
         <div class="site-bar">
-            <a class="brand" id="brand" href="/login">
+            <a class="brand" href="/">
                 <img src="~/favicon.svg" width="36" height="36" alt="">
                 <span>FBISE 9th MCQ Bank<small>Class 9 Science</small></span>
             </a>
-            <nav id="student-nav" aria-label="Main navigation" hidden>
-                <a href="/setup" class="@(page == "setup" ? "active" : null)" aria-current="@(page == "setup" ? "page" : null)">New Test</a>
-                <a href="/history" class="@(page == "history" ? "active" : null)" aria-current="@(page == "history" ? "page" : null)">History &amp; Reports</a>
+            <nav class="public-nav" aria-label="Main navigation">
+                <a href="/">Home</a>
+                <a href="/subjects">Subjects</a>
+                <a href="/fbise-slo-guide">FBISE SLO Guide</a>
+                <a id="dashboard-link" href="/login">Sign In</a>
+                <a id="history-link" href="/history" class="@(page == "history" ? "active" : null)" aria-current="@(page == "history" ? "page" : null)" hidden>History &amp; Reports</a>
+                <a id="admin-shortcut" href="/admin" hidden>Admin</a>
             </nav>
             <div class="account" id="student-account" hidden>
                 <span class="avatar" aria-hidden="true"></span>
@@ -35,6 +62,7 @@
     <main id="content" tabindex="-1">
         @RenderBody()
     </main>
+    <partial name="_PublicFooter" />
     <script type="module" src="~/js/layout.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

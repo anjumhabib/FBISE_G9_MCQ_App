@@ -15,7 +15,8 @@ public sealed class SessionIssuer(JwtOptions options, TimeProvider clock) : ISes
         var now = clock.GetUtcNow().UtcDateTime;
         var expires = now.AddHours(8);
         var jwt = new JwtSecurityToken(options.Issuer, options.Audience,
-            [new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString(System.Globalization.CultureInfo.InvariantCulture))],
+            [new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+                new Claim(ClaimTypes.Role, user.Role.ToString())],
             now, expires, new SigningCredentials(options.Key, SecurityAlgorithms.HmacSha256));
         return new AuthSession(new JwtSecurityTokenHandler().WriteToken(jwt),
             new Profile(user.Id, user.FullName, user.Email), expires);

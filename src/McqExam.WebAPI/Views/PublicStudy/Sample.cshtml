@@ -1,0 +1,36 @@
+@model McqExam.WebAPI.StudySubject
+@{ ViewData["DeferAds"] = true; }
+<div class="page public-page public-article" id="sample-page" data-slug="@Model.Slug">
+    <header class="public-intro">
+        <a href="/subjects/@Model.Slug">Back to the study guide</a>
+        <h1>Free Class 9 @Model.Name sample quiz</h1>
+        <p>Try five questions at your own pace. You can leave any question blank and review the correct answers after submitting.</p>
+        <div class="public-actions"><button id="start-sample" type="button" class="button primary">Start sample quiz</button></div>
+        <noscript><p>Enable JavaScript to take this quiz.</p></noscript>
+    </header>
+    <p class="alert" id="sample-error" role="alert" hidden></p>
+    <form id="sample-form" class="review-section" hidden>
+        <div id="sample-questions" class="review-section"></div>
+        <button id="submit-sample" type="submit" class="button primary">Submit sample quiz</button>
+    </form>
+    <div id="sample-result" class="review-section" hidden>
+        <section class="hero public-intro">
+            <h2 id="sample-score" tabindex="-1"></h2>
+            <p>Review the questions below to see which skills to practise next.</p>
+        </section>
+        <partial name="_Bloom" />
+        <section class="review-section" aria-labelledby="sample-review-title">
+            <h2 id="sample-review-title">Answer review</h2>
+            <div id="sample-review" class="review-section"></div>
+        </section>
+        <div class="card report-card public-copy">
+            <h2>Continue practising</h2>
+            <p>Create a free account for custom chapter tests and saved exam history.</p>
+            <div class="public-actions"><a class="button primary" href="/register">Create a free account</a><a class="button secondary" href="/login">Sign in</a></div>
+        </div>
+    </div>
+    @await Component.InvokeAsync("AdSlot", new { slotKey = "sample_quiz_bottom" })
+</div>
+@section Scripts {
+    <script type="module" src="~/js/sample-quiz.js" asp-append-version="true"></script>
+}

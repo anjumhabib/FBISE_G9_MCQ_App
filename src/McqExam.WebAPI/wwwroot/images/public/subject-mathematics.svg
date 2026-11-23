@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="title">
+  <title id="title">Rise and run on coordinate axes</title>
+  <rect width="640" height="360" rx="20" fill="#fff3dd"/>
+  <g stroke="#e8d6af" stroke-width="2"><path d="M110 80h421M110 126h421M110 172h421M110 218h421M110 264h421M148 68v210m58-210v210m58-210v210m58-210v210m58-210v210m58-210v210m58-210v210"/></g>
+  <path d="M148 68v196h383" fill="none" stroke="#684b28" stroke-width="5"/>
+  <path d="M205 218h233V80z" fill="#f9cc81" fill-opacity=".62" stroke="#a56027" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M421 218v-17h17" fill="none" stroke="#a56027" stroke-width="3"/>
+  <path d="M182 232L461 65" stroke="#7254bf" stroke-width="6" stroke-linecap="round"/>
+  <g fill="#684b28" font-family="sans-serif" font-size="18"><text x="292" y="246">run</text><text x="449" y="149">rise</text><text x="538" y="269">x</text><text x="140" y="55">y</text></g>
+</svg>

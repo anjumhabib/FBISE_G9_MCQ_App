@@ -1,0 +1,35 @@
+@model McqExam.WebAPI.PublicHome
+<div class="page public-page">
+    <section class="hero public-hero">
+        <div>
+            <p class="hero-label">FBISE · SSC-I · NATIONAL CURRICULUM 2022–23</p>
+            <h1>Class 9 Science MCQ Bank</h1>
+            <p>Prepare for Section A with subject study guides, free sample quizzes, and practice organized around Student Learning Outcomes.</p>
+            <div class="public-actions">
+                <a class="button secondary" href="/subjects#sample-quizzes">Try a free sample quiz</a>
+                <a class="button public-hero-link" href="/register">Create a free account</a>
+                <a class="button public-hero-link" href="/login">Sign in</a>
+            </div>
+        </div>
+        <img src="~/images/public/hero-fbise-science.svg" alt="" width="640" height="360" asp-append-version="true">
+    </section>
+    <section class="public-stats" aria-label="Live subject coverage">
+        <div class="card kpi"><span>Science subjects</span><strong>@Model.Subjects</strong></div>
+        <div class="card kpi"><span>Chapters in the practice bank</span><strong>@Model.Chapters</strong></div>
+        <div class="card kpi"><span>Chapters with diagrams</span><strong>@Model.ChaptersWithDiagrams</strong></div>
+    </section>
+    <section aria-labelledby="home-subjects">
+        <h2 id="home-subjects">Study by subject</h2>
+        <partial name="_StudySubjects" />
+    </section>
+    @await Component.InvokeAsync("AdSlot", new { slotKey = "home_mid_banner" })
+    <section class="card report-card public-feature">
+        <div>
+            <h2>How FBISE learning outcomes shape practice</h2>
+            <p>A learning outcome describes a skill you can demonstrate. Practise the same topic by recalling a fact, explaining an idea, applying a rule, and interpreting evidence.</p>
+            <p>Start with a sample quiz. After checking your answers, revisit the skills that caused mistakes and try a custom chapter test.</p>
+            <a class="button secondary" href="/fbise-slo-guide">Read the SLO guide</a>
+        </div>
+        <img src="~/images/public/blooms-pyramid.svg" alt="Four levels of practice from Knowledge to Analyzing" width="640" height="360" loading="lazy" asp-append-version="true">
+    </section>
+</div>

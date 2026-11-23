@@ -7,24 +7,18 @@ public sealed class ExamService(IExamStore store, TimeProvider clock)
 {
     public Task<IReadOnlyList<SubjectInfo>> Subjects(CancellationToken ct) => store.Subjects(ct);
 
-    public async Task<int> Count(ExamFilter filter, CancellationToken ct)
-    {
-        await ValidateFilter(filter, ct);
-        return await store.Count(filter, ct);
-    }
-
-    public async Task<ActiveExam> Start(int userId, StartRequest request, CancellationToken ct)
+    public async Task<ActiveExam> Start(int userId, StartRequest request, CancellationToken ct, DeviceType device = DeviceType.Unknown)
     {
         await ValidateFilter(request, ct);
         var mode = request.Mode ?? throw new RequestFailure("Choose a test mode.");
         var questions = await store.Select(userId, request, request.QuestionCount, ct);
         if (questions.Count != request.QuestionCount)
-            throw new RequestFailure($"Only {questions.Count} questions match these settings.");
+            throw new RequestFailure("Try fewer questions or broaden your filters to start a test.");
 
         var attempt = new ExamAttempt
         {
             Id = Guid.NewGuid(), UserId = userId, SubjectId = request.SubjectId,
-            Mode = mode, ChaptersJson = JsonSerializer.Serialize(request.ChapterIds),
+            Mode = mode, Device = device, ChaptersJson = JsonSerializer.Serialize(request.ChapterIds),
             BloomFilter = request.BloomLevel?.ToString(), TotalQuestions = questions.Count,
             StartedAt = clock.GetUtcNow().UtcDateTime
         };
@@ -130,7 +124,7 @@ public sealed class ExamService(IExamStore store, TimeProvider clock)
         attempt.Answers.Where(x => x.SelectedOption is not null)
             .Select(x => new AnswerInput(x.QuestionId, x.SelectedOption)).ToArray());
 
-    private static ExamQuestion Question(ExamAnswer answer)
+    internal static ExamQuestion Question(ExamAnswer answer)
     {
         var q = answer.Question;
         return new(q.Id, answer.Position, q.Chapter.ChapterNo, q.Chapter.Title, answer.BloomLevel,
@@ -158,7 +152,7 @@ public sealed class ExamService(IExamStore store, TimeProvider clock)
         return new(correct, total, Percent(correct, total));
     }
 
-    private static BloomResult[] Bloom(IEnumerable<ExamAnswer> answers) =>
+    internal static BloomResult[] Bloom(IEnumerable<ExamAnswer> answers) =>
         Enum.GetValues<BloomLevel>().Select(level => new BloomResult(level,
             Measure(answers.Where(x => x.BloomLevel == level)))).ToArray();
 }

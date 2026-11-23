@@ -1,0 +1,26 @@
+<section class="kpi-grid" id="dashboard-kpis" aria-label="Dashboard metrics">
+    <div class="card kpi"><span>Total students</span><strong id="dashboard-students"></strong><small id="dashboard-active"></small></div>
+    <div class="card kpi"><span>Total attempts</span><strong id="dashboard-attempts"></strong><small id="dashboard-abandoned"></small><small id="dashboard-devices"></small></div>
+    <div class="card kpi"><span>Overall average score</span><strong id="dashboard-average"></strong></div>
+    <div class="card kpi"><span>Question bank</span><strong id="dashboard-questions"></strong></div>
+</section>
+<div class="admin-chart-grid">
+    <section class="card report-card admin-chart-card" aria-labelledby="attempt-trend-title">
+        <h2 id="attempt-trend-title">Test activity</h2>
+        <p class="muted">Daily exam attempts over the last 30 days (UTC)</p>
+        <div id="dashboard-trend"></div>
+    </section>
+    <section class="card report-card admin-chart-card" aria-labelledby="subject-average-title">
+        <h2 id="subject-average-title">Subject averages</h2>
+        <p class="muted">Average scores on completed tests</p>
+        <div id="dashboard-subjects"></div>
+    </section>
+</div>
+<section class="card report-card admin-table-card" aria-labelledby="recent-attempts-title">
+    <h2 id="recent-attempts-title">Recent attempts</h2>
+    <div id="dashboard-table"></div>
+    <div id="dashboard-pages"></div>
+</section>
+@section Scripts {
+    <script type="module" src="~/js/admin/dashboard.js" asp-append-version="true"></script>
+}

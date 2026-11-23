@@ -1,0 +1,33 @@
+@using McqExam.Domain
+@model McqExam.WebAPI.AdSlotView
+@{
+    var slot = Model.Placement;
+    var preview = Model.Page.Global.PreviewPlaceholderMode;
+    var format = slot.AdFormat switch
+    {
+        AdFormat.InFeedNative => "fluid",
+        AdFormat.SidebarRectangle => "rectangle",
+        _ => "auto"
+    };
+}
+<div class="ad-container @(Model.HideOnMobile ? "hide-mobile" : null) @(slot.HideOnDesktop ? "hide-desktop" : null)"
+     data-ad-container data-slot-key="@slot.SlotKey" style="--ad-min-height: @(slot.MinHeightPx)px" hidden>
+    <div class="ad-label">Advertisement</div>
+    @if (preview)
+    {
+        <div class="ad-placeholder">
+            <strong>@slot.SlotKey</strong>
+            <span>@slot.AdFormat · responsive width × @(slot.MinHeightPx) px minimum</span>
+        </div>
+    }
+    else
+    {
+        <div class="ad-unit">
+            <template data-ad-unit>
+                <ins class="adsbygoogle" data-ad-client="@Model.Page.Global.PublisherId" data-ad-slot="@slot.AdSlotId"
+                     data-ad-format="@format" data-ad-full-width-responsive="@(slot.AdFormat == AdFormat.ResponsiveBanner ? "true" : null)"
+                     data-ad-layout-key="@(slot.AdFormat == AdFormat.InFeedNative ? Model.Page.InFeedLayoutKey : null)"></ins>
+            </template>
+        </div>
+    }
+</div>

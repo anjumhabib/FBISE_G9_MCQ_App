@@ -1,0 +1,14 @@
+<section id="subject-summary" class="admin-subject-grid" aria-label="Subject summaries"></section>
+<section class="card report-card admin-chart-card" aria-labelledby="subject-bloom-title">
+    <h2 id="subject-bloom-title">Bloom’s Taxonomy mastery</h2>
+    <p class="muted">Answer accuracy by subject and Bloom’s level</p>
+    <div id="subject-bloom"></div>
+</section>
+<section class="card report-card admin-table-card" aria-labelledby="weak-chapters-title">
+    <h2 id="weak-chapters-title">Chapter weakness heatmap</h2>
+    <p class="muted">Chapters with recorded answers are ranked by lowest accuracy first.</p>
+    <div id="subject-chapters"></div>
+</section>
+@section Scripts {
+    <script type="module" src="~/js/admin/subjects.js" asp-append-version="true"></script>
+}

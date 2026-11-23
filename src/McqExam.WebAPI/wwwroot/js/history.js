@@ -1,4 +1,5 @@
 import { api, byId, clone, duration, field, formatDate, renderBloom, session, showMessage } from './site.js';
+import { activateAds } from './ads.js';
 
 const student = session.get()?.user;
 if (student) void load(student);
@@ -40,6 +41,7 @@ async function load(student) {
         print.disabled = false;
         print.addEventListener('click', () => window.print());
         if (count) drawChart(attempts.slice(0, 15).reverse());
+        void activateAds();
     } catch (error) {
         showMessage(byId('history-error'), error.message);
     } finally { byId('loading-history').hidden = true; }

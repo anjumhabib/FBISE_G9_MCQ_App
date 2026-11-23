@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="title">
+  <title id="title">Answer, revisit, and verify</title>
+  <rect width="640" height="360" rx="20" fill="#edf1ff"/>
+  <g fill="#fff" stroke="#8f7dd9" stroke-width="4">
+    <rect x="42" y="111" width="159" height="141" rx="18"/><rect x="241" y="111" width="159" height="141" rx="18"/><rect x="440" y="111" width="159" height="141" rx="18"/>
+  </g>
+  <g fill="none" stroke="#684ec8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M80 162h80m-80 18h58m-58 18h72m56-16h24m-10-8 10 8-10 8m185-8h24m-10-8 10 8-10 8"/>
+    <path d="M350 157a33 33 0 1 0 0 47m0-47h-16m16 0v16M489 184l20 21 45-49"/>
+  </g>
+  <g text-anchor="middle" fill="#403074" font-family="sans-serif" font-size="18"><text x="122" y="230">Answer</text><text x="320" y="230">Revisit</text><text x="519" y="230">Verify</text></g>
+</svg>

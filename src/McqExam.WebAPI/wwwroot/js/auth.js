@@ -1,4 +1,4 @@
-import { api, byId, localUrl, session, showMessage } from './site.js';
+import { api, byId, isAdminSession, localUrl, session, showMessage } from './site.js';
 
 const form = byId('auth-form');
 const button = form.querySelector('button[type="submit"]');
@@ -31,8 +31,10 @@ form.addEventListener('submit', async event => {
         session.set(await api('/api/auth/' + form.dataset.mode, { method: 'POST', body }));
         const destination = new URLSearchParams(location.search).get('returnUrl');
         const target = destination && localUrl(destination);
-        location.replace(target && /^\/(?:setup|history|exam\/[^/]+|review\/[^/]+)\/?$/i.test(target.pathname)
-            ? target.pathname + target.search : '/setup');
+        const studentPage = /^\/(?:setup|history|exam\/[^/]+|review\/[^/]+)\/?$/i;
+        const adminPage = /^\/admin(?:\/(?:students|subjects|questions|quality|visits|ads|attempts\/[0-9a-f-]{36}))?\/?$/i;
+        location.replace(target && (studentPage.test(target.pathname) || adminPage.test(target.pathname))
+            ? target.pathname + target.search : isAdminSession() ? '/admin' : '/setup');
     } catch (error) {
         showMessage(errorBox, error.message);
     } finally {

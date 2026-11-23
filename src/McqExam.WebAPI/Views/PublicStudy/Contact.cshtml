@@ -1,0 +1,36 @@
+@model McqExam.Application.ContactRequest
+@{
+    var submitted = TempData["ContactSent"] is true;
+    var email = (string?)ViewData["SupportEmail"];
+}
+<div class="page public-page public-article">
+    <header class="public-intro">
+        <h1>Contact us</h1>
+        <p>Report a question, missing diagram, syllabus issue, or account problem.</p>
+    </header>
+    <section class="card report-card public-copy">
+        <h2>Send a message</h2>
+        <p>For a question correction, include the subject and chapter, which question you saw, and why you think it needs review. Leave passwords and other sensitive information out of your message.</p>
+        @if (!string.IsNullOrWhiteSpace(email))
+        {
+            <p>Email support at <a href="mailto:@email">@email</a>.</p>
+        }
+        @if (submitted)
+        {
+            <p class="public-confirmation" role="status">Your message was received.</p>
+        }
+        <form class="public-form" asp-action="SendContact" method="post">
+            <div asp-validation-summary="ModelOnly" class="field-error"></div>
+            <label asp-for="Name">Your name</label>
+            <input asp-for="Name" autocomplete="name" maxlength="100" required>
+            <span asp-validation-for="Name" class="field-error"></span>
+            <label asp-for="Email">Email address</label>
+            <input asp-for="Email" type="email" autocomplete="email" maxlength="254" required>
+            <span asp-validation-for="Email" class="field-error"></span>
+            <label asp-for="Message">Message</label>
+            <textarea asp-for="Message" rows="6" maxlength="2000" required></textarea>
+            <span asp-validation-for="Message" class="field-error"></span>
+            <button class="button primary" type="submit">Send message</button>
+        </form>
+    </section>
+</div>

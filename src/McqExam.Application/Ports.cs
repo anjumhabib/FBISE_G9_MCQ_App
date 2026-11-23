@@ -6,6 +6,7 @@ public interface IUserStore
 {
     Task<User?> Find(string email, CancellationToken ct);
     Task<bool> Create(User user, CancellationToken ct);
+    Task<bool> IsActiveAdmin(int id, CancellationToken ct);
 }
 
 public interface IPasswordHasher
@@ -23,7 +24,6 @@ public interface IExamStore
 {
     Task<IReadOnlyList<SubjectInfo>> Subjects(CancellationToken ct);
     Task<bool> ValidFilter(ExamFilter filter, CancellationToken ct);
-    Task<int> Count(ExamFilter filter, CancellationToken ct);
     Task<List<Question>> Select(int userId, ExamFilter filter, int count, CancellationToken ct);
     Task Create(ExamAttempt attempt, CancellationToken ct);
     Task<ExamAttempt?> Find(Guid id, int userId, CancellationToken ct);

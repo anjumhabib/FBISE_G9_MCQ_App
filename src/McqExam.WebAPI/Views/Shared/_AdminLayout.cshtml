@@ -1,0 +1,92 @@
+@{
+    var adminPage = (string?)ViewData["AdminPage"];
+    var isAdSettings = adminPage == "ads";
+    var links = new (string Page, string Path, string Label)[]
+    {
+        ("dashboard", "/admin", "Dashboard"),
+        ("students", "/admin/students", "Students"),
+        ("subjects", "/admin/subjects", "Subjects & Chapters"),
+        ("questions", "/admin/questions", "Question Analytics"),
+        ("quality", "/admin/quality", "Quality & Duplicates"),
+        ("visits", "/admin/visits", "User Visits"),
+        ("ads", "/admin/ads", "Ad Settings")
+    };
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>@ViewData["Title"] · Administration · FBISE 9th MCQ Bank</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f8fafc">
+    <link rel="icon" href="~/favicon.svg">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true">
+    <script src="~/js/session.js" asp-append-version="true" data-protected="true"></script>
+    @if (!isAdSettings)
+    {
+        <script src="~/vendor/chart.umd.min.js" asp-append-version="true" defer></script>
+    }
+</head>
+<body class="admin-body" data-attempt-id="@ViewData["AttemptId"]">
+    <a href="#admin-content" class="skip-link">Skip to content</a>
+    <header class="site-header">
+        <div class="site-bar admin-topbar">
+            <button type="button" id="admin-menu" class="button secondary small" aria-controls="admin-sidebar" aria-expanded="false" hidden>Menu</button>
+            <a class="brand" href="/admin">
+                <img src="~/favicon.svg" width="36" height="36" alt="">
+                <span>FBISE 9th MCQ Bank<small>Administration</small></span>
+            </a>
+            <div class="account" id="admin-account" hidden>
+                <span class="account-name"></span>
+                <a class="button ghost small" href="/setup">Student area</a>
+                <button class="button secondary small" id="admin-logout" type="button">Logout</button>
+            </div>
+        </div>
+    </header>
+    <div id="admin-shell" class="admin-shell">
+        <aside id="admin-sidebar" class="admin-sidebar" hidden>
+            <nav aria-label="Admin navigation">
+                @foreach (var link in links)
+                {
+                    <a href="@link.Path" aria-current="@(adminPage == link.Page ? "page" : null)">@link.Label</a>
+                }
+            </nav>
+        </aside>
+        <main id="admin-content" class="page admin-page" tabindex="-1">
+            <p id="admin-loading" class="card state screen-only" role="status">@(isAdSettings ? "Loading ad settings…" : "Loading report…")</p>
+            <section id="admin-denied" class="card report-card" hidden>
+                <h1>Access Denied</h1>
+                <p class="muted">An administrator account is required to open this page.</p>
+                <div class="admin-actions"><a class="button primary" href="/setup">Return to student area</a></div>
+            </section>
+            <noscript><p class="alert">JavaScript is required to sign in and load admin reports.</p></noscript>
+            <p id="admin-error" class="alert screen-only" role="alert" hidden></p>
+            <div id="admin-workspace" class="admin-workspace" hidden>
+                <header class="page-heading admin-heading">
+                    <div>
+                        <p class="print-only admin-print-brand">FBISE Class 9 Science · Administration</p>
+                        <h1 id="admin-title">@ViewData["Title"]</h1>
+                    </div>
+                    <div class="admin-actions screen-only" hidden="@isAdSettings">
+                        <button type="button" class="button secondary" id="admin-export" disabled>Export CSV</button>
+                        <button type="button" class="button primary" id="admin-print" disabled>Print / Save PDF</button>
+                    </div>
+                </header>
+                @if (!isAdSettings && adminPage != "attempt")
+                {
+                    <partial name="_AdminFilters" />
+                }
+                <p id="admin-print-scope" class="print-only admin-print-scope" hidden></p>
+                <div id="admin-report" class="admin-report" hidden>
+                    @RenderBody()
+                </div>
+            </div>
+            <div id="admin-retry" class="admin-actions screen-only" hidden>
+                <button id="admin-retry-button" class="button secondary" type="button">Try again</button>
+            </div>
+        </main>
+    </div>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

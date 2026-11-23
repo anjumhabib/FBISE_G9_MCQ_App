@@ -10,6 +10,14 @@ public sealed class AuthService(IUserStore users, IPasswordHasher passwords, ISe
         var name = request.FullName.Trim();
         if (name.Length < 2)
             throw new RequestFailure("Enter a full name with at least two characters.");
+        var mobileNo = request.MobileNo.Trim();
+        var phone = mobileNo.StartsWith('+') ? mobileNo[1..] : mobileNo;
+        if (phone.Count(char.IsAsciiDigit) is < 7 or > 15 ||
+            phone.Any(x => !char.IsAsciiDigit(x) && x is not (' ' or '-' or '(' or ')' or '.')))
+            throw new RequestFailure("Enter a valid mobile number with 7 to 15 digits.");
+        var schoolName = request.SchoolName.Trim();
+        if (schoolName.Length == 0)
+            throw new RequestFailure("Enter your school name.");
         if (Encoding.UTF8.GetByteCount(request.Password) > 72)
             throw new RequestFailure("The password exceeds the 72-byte limit.");
 
@@ -18,7 +26,8 @@ public sealed class AuthService(IUserStore users, IPasswordHasher passwords, ISe
             throw new RequestFailure("An account already exists for this email.", 409);
         var user = new User
         {
-            FullName = name, Email = email, PasswordHash = passwords.Hash(request.Password),
+            FullName = name, MobileNo = mobileNo, SchoolName = schoolName,
+            Email = email, PasswordHash = passwords.Hash(request.Password),
             CreatedAt = clock.GetUtcNow().UtcDateTime
         };
         if (!await users.Create(user, ct))

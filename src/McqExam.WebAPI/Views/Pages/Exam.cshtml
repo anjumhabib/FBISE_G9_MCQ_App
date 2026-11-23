@@ -34,7 +34,8 @@
                 <button id="next" type="button" class="button primary">Next</button>
             </div>
         </section>
-        <aside class="card navigator">
+        <aside class="exam-sidebar">
+          <div class="card navigator">
             <div class="section-heading-row"><h2>Question Navigator</h2><span class="badge slate" id="answered-count"></span></div>
             <div class="question-palette" id="question-palette" aria-label="Go to question"></div>
             <ul class="legend">
@@ -42,6 +43,8 @@
                 <li><i class="marked"></i>Marked</li><li><i></i>Unanswered</li>
             </ul>
             <p class="keyboard-hint">Keyboard <kbd>A</kbd>–<kbd>D</kbd> or <kbd>1</kbd>–<kbd>4</kbd> to answer. <kbd>←</kbd> <kbd>→</kbd> to move.</p>
+          </div>
+          @await Component.InvokeAsync("AdSlot", new { slotKey = "exam_desktop_sidebar" })
         </aside>
     </div>
     <dialog id="confirm-submit" aria-labelledby="submit-title">

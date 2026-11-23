@@ -1,14 +1,19 @@
-import { byId, session } from './site.js';
+import { byId, isAdminSession, session } from './site.js';
+import { activateAds } from './ads.js';
 
 const student = session.get()?.user;
 if (student) {
-    byId('brand').href = '/setup';
-    byId('student-nav').hidden = false;
+    const dashboard = byId('dashboard-link');
+    dashboard.href = '/setup';
+    dashboard.textContent = 'Dashboard';
+    byId('history-link').hidden = false;
+    byId('admin-shortcut').hidden = !isAdminSession();
     const account = byId('student-account');
     account.querySelector('.avatar').textContent = student.fullName.slice(0, 1).toUpperCase();
     account.querySelector('.account-name').textContent = student.fullName;
     account.hidden = false;
 }
+if (document.body.dataset.publicAds === 'true') void activateAds();
 
 byId('logout').addEventListener('click', () => {
     session.set(null);

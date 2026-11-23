@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using McqExam.Application;
+using McqExam.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -14,6 +15,7 @@ public sealed class AuthController(AuthService service) : ControllerBase
         StatusCode(201, await service.Register(request, ct));
 
     [HttpPost("login")]
+    [TrackVisit(UserVisitEventType.Login)]
     public Task<AuthSession> Login(LoginRequest request, CancellationToken ct) => service.Login(request, ct);
 }
 
@@ -21,24 +23,23 @@ public sealed class AuthController(AuthService service) : ControllerBase
 public sealed class SubjectsController(ExamService service) : ControllerBase
 {
     [HttpGet]
+    [TrackVisit(UserVisitEventType.PageView)]
     public Task<IReadOnlyList<SubjectInfo>> Get(CancellationToken ct) => service.Subjects(ct);
 }
 
 [ApiController, Authorize, Route("api/exams")]
 public sealed class ExamsController(ExamService service) : ControllerBase
 {
-    [HttpPost("count")]
-    public async Task<object> Count(ExamFilter filter, CancellationToken ct) =>
-        new { count = await service.Count(filter, ct) };
-
     [HttpPost("start")]
+    [TrackVisit(UserVisitEventType.ExamStart)]
     public async Task<ActionResult<ActiveExam>> Start(StartRequest request, CancellationToken ct)
     {
-        var exam = await service.Start(Student.Id(User), request, ct);
+        var exam = await service.Start(Student.Id(User), request, ct, ClientDevice.Classify(Request.Headers.UserAgent));
         return CreatedAtAction(nameof(Resume), new { attemptId = exam.AttemptId }, exam);
     }
 
     [HttpGet("{attemptId:guid}")]
+    [TrackVisit(UserVisitEventType.PageView)]
     public Task<ActiveExam> Resume(Guid attemptId, CancellationToken ct) => service.Resume(attemptId, Student.Id(User), ct);
 
     [HttpPut("{attemptId:guid}/answers")]
@@ -49,10 +50,12 @@ public sealed class ExamsController(ExamService service) : ControllerBase
     }
 
     [HttpPost("{attemptId:guid}/submit")]
+    [TrackVisit(UserVisitEventType.ExamSubmit)]
     public Task<Result> Submit(Guid attemptId, SubmitRequest request, CancellationToken ct) =>
         service.Submit(attemptId, Student.Id(User), request, ct);
 
     [HttpGet("{attemptId:guid}/review")]
+    [TrackVisit(UserVisitEventType.PageView)]
     public Task<Review> Review(Guid attemptId, CancellationToken ct) => service.Review(attemptId, Student.Id(User), ct);
 }
 
@@ -60,6 +63,7 @@ public sealed class ExamsController(ExamService service) : ControllerBase
 public sealed class ReportsController(ExamService service) : ControllerBase
 {
     [HttpGet("history")]
+    [TrackVisit(UserVisitEventType.PageView)]
     public Task<History> History(CancellationToken ct) => service.History(Student.Id(User), ct);
 }
 

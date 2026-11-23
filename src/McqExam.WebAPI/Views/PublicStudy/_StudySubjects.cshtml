@@ -1,0 +1,16 @@
+<div class="public-grid">
+    @foreach (var subject in McqExam.WebAPI.PublicStudyCatalog.Subjects)
+    {
+        <article class="card public-subject">
+            <img src="@subject.Image" alt="" width="640" height="360" loading="lazy" asp-append-version="true">
+            <div class="report-card">
+                <h3>@subject.Name</h3>
+                <p class="muted">@subject.Description</p>
+                <div class="public-actions">
+                    <a class="button secondary small" href="/subjects/@subject.Slug">Study guide<span class="sr-only"> for @subject.Name</span></a>
+                    <a class="button primary small" href="/sample-quiz/@subject.Slug">Sample quiz<span class="sr-only"> for @subject.Name</span></a>
+                </div>
+            </div>
+        </article>
+    }
+</div>

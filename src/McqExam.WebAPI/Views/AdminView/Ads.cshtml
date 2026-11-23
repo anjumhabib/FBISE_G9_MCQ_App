@@ -1,0 +1,78 @@
+<p class="card admin-ad-notice">Sign-in, registration, error pages, and all admin pages are permanently excluded from ads.</p>
+<section class="card report-card admin-ad-card" aria-labelledby="ad-global-title">
+    <h2 id="ad-global-title">Global configuration</h2>
+    <form id="ad-global-form">
+        <fieldset class="admin-ad-form">
+            <div class="admin-ad-switches">
+                <label class="admin-ad-switch"><input name="adsEnabled" type="checkbox" role="switch"> Enable ads globally</label>
+                <label class="admin-ad-switch"><input name="autoAdsEnabled" type="checkbox" role="switch"> Enable Auto Ads (anchor and vignette)</label>
+                <label class="admin-ad-switch"><input name="previewPlaceholderMode" type="checkbox" role="switch"> Preview placeholder mode</label>
+            </div>
+            <div class="admin-fields admin-ad-fields">
+                <label>AdSense publisher ID
+                    <input name="publisherId" pattern="ca-pub-[0-9]{16}" maxlength="23" placeholder="ca-pub-XXXXXXXXXXXXXXXX" spellcheck="false">
+                </label>
+                <label>Answer review in-feed interval (questions)
+                    <input name="inFeedInterval" type="number" min="5" max="10" step="1" required>
+                </label>
+            </div>
+            <label class="admin-ad-text">ads.txt content
+                <textarea name="adsTxtContent" rows="4" spellcheck="false" aria-describedby="ads-txt-hint"></textarea>
+            </label>
+            <p id="ads-txt-hint" class="muted">Leave blank to generate the Google entry from the publisher ID.</p>
+            <div class="admin-actions">
+                <button type="submit" class="button primary">Save global settings</button>
+                <a class="button secondary" href="/ads.txt" target="_blank" rel="noopener">Test /ads.txt</a>
+            </div>
+        </fieldset>
+        <p class="admin-ad-status" role="status" hidden></p>
+        <p class="alert" role="alert" hidden></p>
+    </form>
+</section>
+<section class="admin-ad-card" aria-labelledby="ad-placements-title">
+    <h2 id="ad-placements-title">Page placements</h2>
+    <div id="ad-pages" class="admin-ad-pages"></div>
+</section>
+
+<template id="ad-page-template">
+    <section class="card report-card admin-ad-card admin-ad-page">
+        <div class="admin-section-heading">
+            <div><h3 data-field="name"></h3><p class="muted" data-field="summary"></p></div>
+            <div class="admin-actions">
+                <button type="button" class="button secondary small" data-field="enable">Enable all</button>
+                <button type="button" class="button secondary small" data-field="disable">Disable all</button>
+            </div>
+        </div>
+        <p class="admin-ad-status" role="status" data-field="status" hidden></p>
+        <p class="alert" role="alert" data-field="error" hidden></p>
+        <div data-field="placements"></div>
+    </section>
+</template>
+
+<template id="ad-placement-template">
+    <form class="admin-ad-slot">
+        <fieldset class="admin-ad-form">
+            <div><strong data-field="name"></strong><p class="muted" data-field="description"></p></div>
+            <div class="admin-ad-switches">
+                <label class="admin-ad-switch"><input name="isEnabled" type="checkbox" role="switch"> Show placement</label>
+                <label class="admin-ad-switch"><input name="hideOnMobile" type="checkbox"> Hide on mobile</label>
+                <label class="admin-ad-switch"><input name="hideOnDesktop" type="checkbox"> Hide on desktop</label>
+            </div>
+            <div class="admin-fields admin-ad-fields">
+                <label>AdSense slot ID
+                    <input name="adSlotId" pattern="[0-9]+" maxlength="32" inputmode="numeric" spellcheck="false">
+                </label>
+                <label>Minimum height (px)
+                    <input name="minHeightPx" type="number" min="1" max="2147483647" step="1" required>
+                </label>
+            </div>
+            <button type="submit" class="button secondary small">Save placement</button>
+        </fieldset>
+        <p class="admin-ad-status" role="status" hidden></p>
+        <p class="alert" role="alert" hidden></p>
+    </form>
+</template>
+
+@section Scripts {
+    <script type="module" src="~/js/admin/ads.js" asp-append-version="true"></script>
+}

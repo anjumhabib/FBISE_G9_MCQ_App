@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="title">
+  <title id="title">An atom and a laboratory flask</title>
+  <rect width="640" height="360" rx="20" fill="#f1edff"/>
+  <g transform="translate(213 175)" fill="none" stroke="#7657c1" stroke-width="5">
+    <ellipse rx="129" ry="50"/><ellipse rx="129" ry="50" transform="rotate(60)"/><ellipse rx="129" ry="50" transform="rotate(-60)"/>
+    <circle r="23" fill="#8d79eb"/><circle cx="-111" cy="-26" r="9" fill="#58c7ad"/><circle cx="57" cy="100" r="9" fill="#58c7ad"/><circle cx="69" cy="-90" r="9" fill="#58c7ad"/>
+  </g>
+  <path d="M451 71h54l-6 13v74l73 105q15 26-12 26H396q-27 0-12-26l73-105V84z" fill="#fff" stroke="#5846a4" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M412 221h132l29 46q8 15-11 15H393q-15 0-6-15z" fill="#96e0cf"/>
+  <path d="M449 72h58m-54 151h52m-77 23h35m12-62h23" stroke="#5846a4" stroke-width="4" stroke-linecap="round"/>
+  <g fill="#6ed5bd"><circle cx="457" cy="211" r="6"/><circle cx="517" cy="193" r="7"/><circle cx="492" cy="168" r="4"/></g>
+</svg>

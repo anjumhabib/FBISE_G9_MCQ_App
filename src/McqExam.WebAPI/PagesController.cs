@@ -1,8 +1,10 @@
+using McqExam.Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace McqExam.WebAPI;
 
 [ApiExplorerSettings(IgnoreApi = true)]
+[TrackVisit(UserVisitEventType.PageView)]
 public sealed class PagesController : Controller
 {
     [HttpGet("/login")]
