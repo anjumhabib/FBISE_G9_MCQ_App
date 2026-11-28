@@ -10,7 +10,7 @@ export async function activateAds() {
     if (settings.adminPreview === 'true') {
         if (!isAdminSession()) return;
         try {
-            const settings = await api('/api/admin/ads/settings');
+            const settings = await api('/api/admin/ads/settings', { optional: true });
             if (!settings.global.adsEnabled || !settings.global.previewPlaceholderMode) return;
         } catch {
             return;

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace McqExam.WebAPI;
 
 [ApiController, Authorize(Roles = "Admin"), Route("api/admin")]
+[ServiceFilter(typeof(AdminReportTimeZoneFilter))]
 [ProducesResponseType(StatusCodes.Status401Unauthorized)]
 [ProducesResponseType(StatusCodes.Status403Forbidden)]
 public sealed class AdminController(AdminReportService reports, AdminAuditService audit, AdminTrafficService traffic,

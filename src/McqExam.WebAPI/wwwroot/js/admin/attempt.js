@@ -16,12 +16,12 @@ mountReport({
         byId('attempt-time').textContent = completed ? elapsed(attempt.timeSpentSeconds) : noValue;
         byId('attempt-student-link').href = '/admin/students?studentId=' + encodeURIComponent(student.id);
         facts(byId('attempt-student'), [
-            ['Name', student.fullName], ['Email', student.email], ['Registered (UTC)', date(student.createdAt)]
+            ['Name', student.fullName], ['Email', student.email], ['Registered', date(student.createdAt)]
         ]);
         facts(byId('attempt-details'), [
             ['Start device', attempt.device ?? 'Unknown'],
             ['Chapters', chapters.map(item => item.chapterNo + '. ' + item.title).join(', ') || noValue],
-            ['Started (UTC)', timestamp(attempt.startedAt)], ['Ended (UTC)', timestamp(attempt.completedAt)],
+            ['Started', timestamp(attempt.startedAt)], ['Ended', timestamp(attempt.completedAt)],
             ['Questions', count(attempt.totalQuestions)]
         ]);
         renderBloom(byId('bloom-list'), bloom);

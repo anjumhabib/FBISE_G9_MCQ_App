@@ -17,7 +17,7 @@ public interface IPasswordHasher
 
 public interface ISessionIssuer
 {
-    AuthSession Issue(User user);
+    AuthSession Issue(User user, Guid sessionId, DateTime sessionExpiresAt);
 }
 
 public interface IExamStore
@@ -28,7 +28,9 @@ public interface IExamStore
     Task Create(ExamAttempt attempt, CancellationToken ct);
     Task<ExamAttempt?> Find(Guid id, int userId, CancellationToken ct);
     Task<bool> SaveDraft(Guid id, int userId, AnswerInput answer, CancellationToken ct);
-    Task<bool> SaveSubmission(CancellationToken ct);
+    Task<List<(Guid Id, int UserId)>> Overdue(DateTime now, int limit, CancellationToken ct);
+    Task<T> WithinSubmission<T>(Func<Task<T>> action, CancellationToken ct);
+    Task SaveSubmission(ExamAttempt attempt, CancellationToken ct);
     Task<List<ExamAttempt>> History(int userId, CancellationToken ct);
 }
 

@@ -1,8 +1,8 @@
 import { duration } from '../site.js';
 
 const number = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
-const dateOnly = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeZone: 'UTC' });
-const dateAndTime = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' });
+const dateOnly = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium' });
+const dateAndTime = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
 
 export const noValue = '—';
 export const count = value => value == null ? noValue : number.format(value);
@@ -13,6 +13,10 @@ export function deviceBreakdown(totals) {
     return Object.entries(labels).filter(([key]) => totals?.[key] > 0)
         .map(([key, label]) => label + ' ' + count(totals[key])).join(' · ') || noValue;
 }
+const calendarLabel = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeZone: 'UTC' });
+const shortCalendarLabel = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+export const calendarDate = (value, short = false) =>
+    (short ? shortCalendarLabel : calendarLabel).format(new Date(value + 'T00:00:00Z'));
 export const date = value => value ? dateOnly.format(new Date(value)) : noValue;
 export const timestamp = value => value ? dateAndTime.format(new Date(value)) : noValue;
 export const elapsed = value => value == null ? noValue : duration(value);
@@ -119,7 +123,7 @@ export function attemptLink(attempt, label = 'Review test') {
 export function renderAttempts(container, attempts, { showStudent = false } = {}) {
     table(container, {
         label: 'Test attempts',
-        headers: ['Started (UTC)', ...(showStudent ? ['Student'] : []), 'Subject', 'Mode', 'Start device', 'Score', 'Time', 'Review'],
+        headers: ['Started', ...(showStudent ? ['Student'] : []), 'Subject', 'Mode', 'Start device', 'Score', 'Time', 'Review'],
         rows: attempts.map(attempt => [
             timestamp(attempt.startedAt),
             ...(showStudent ? [link(attempt.studentName, '/admin/students?studentId=' + encodeURIComponent(attempt.studentId))] : []),

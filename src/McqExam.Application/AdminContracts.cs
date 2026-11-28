@@ -11,6 +11,10 @@ public class AdminExportFilter
 
 public class AdminReportFilter : AdminExportFilter, IValidatableObject
 {
+    [StringLength(128)] public string? TimeZone { get; init; }
+    public TimeZoneInfo ReportingTimeZone { get; private set; } = TimeZoneInfo.Utc;
+    public void UseTimeZone(TimeZoneInfo timeZone) => ReportingTimeZone = timeZone;
+
     public DateOnly? FromDate { get; init; }
     public DateOnly? ToDate { get; init; }
     [Range(1, int.MaxValue)] public int? SubjectId { get; init; }

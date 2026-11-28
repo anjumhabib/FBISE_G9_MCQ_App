@@ -1,4 +1,6 @@
-import { api, byId, selectButton, session, showMessage } from '../site.js';
+import { api, byId, request as fetchReport, selectButton, session, showMessage } from '../site.js';
+
+const viewerTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const filterKeys = ['fromDate', 'toDate', 'subjectId', 'chapterId', 'studentId', 'device', 'search', 'page', 'pageSize',
     'inactiveDays', 'bloomLevel', 'maxAccuracy', 'suspectedWrongKey', 'neverAttempted', 'eventType'];
@@ -9,6 +11,7 @@ export function reportUrl(endpoint, query, overrides = {}) {
         if (value === null) params.delete(key);
         else params.set(key, value);
     }
+    if (viewerTimeZone && !params.has('export')) params.set('timeZone', viewerTimeZone);
     return '/api/admin/' + endpoint + (params.size ? '?' + params : '');
 }
 
@@ -32,7 +35,7 @@ export function mountReport({ endpoint, url, load, render, exportLabel }) {
     const printButton = byId('admin-print');
     const printScope = byId('admin-print-scope');
     const formatTimestamp = new Intl.DateTimeFormat('en-GB', {
-        dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC'
+        dateStyle: 'medium', timeStyle: 'short'
     });
 
     let request;
@@ -92,14 +95,14 @@ export function mountReport({ endpoint, url, load, render, exportLabel }) {
         const subject = form?.elements.subjectId;
         const chapter = form?.elements.chapterId;
         const values = [
-            params.has('fromDate') && 'From ' + params.get('fromDate') + ' UTC',
-            params.has('toDate') && 'To ' + params.get('toDate') + ' UTC',
+            params.has('fromDate') && 'From ' + params.get('fromDate'),
+            params.has('toDate') && 'To ' + params.get('toDate'),
             subject?.value && subject.selectedOptions[0]?.textContent,
             chapter?.value && 'Chapter ' + chapter.selectedOptions[0]?.textContent,
             params.has('device') && 'Device ' + params.get('device'),
             params.has('search') && 'Search: ' + params.get('search')
         ].filter(Boolean);
-        values.push('Generated ' + formatTimestamp.format(new Date()) + ' UTC');
+        values.push('Generated ' + formatTimestamp.format(new Date()) + (viewerTimeZone ? ' · ' + viewerTimeZone : ''));
         showMessage(printScope, values.join(' · '));
     }
 
@@ -107,7 +110,7 @@ export function mountReport({ endpoint, url, load, render, exportLabel }) {
         workspace.hidden = false;
         if (catalogRequested || !form) return;
         catalogRequested = true;
-        api('/api/subjects').then(subjects => {
+        api('/api/subjects', { optional: true }).then(subjects => {
             catalog = subjects;
             const subject = form.elements.subjectId;
             const subjectId = subject.value;
@@ -224,16 +227,8 @@ export function mountReport({ endpoint, url, load, render, exportLabel }) {
         if (!params) return;
         exportButton.disabled = true;
         showMessage(errorBox);
-        const activeSession = session.get();
         try {
-            const response = await fetch(urlFor(params, { export: 'csv' }), {
-                headers: { Authorization: 'Bearer ' + (activeSession?.token ?? '') }
-            });
-            if (response.status === 401 && session.get()?.token === activeSession?.token) {
-                session.set(null);
-                location.replace(session.loginUrl());
-                return;
-            }
+            const response = await fetchReport(urlFor(params, { export: 'csv' }));
             if (response.status === 403 && lastQuery === params) {
                 denyAccess();
                 return;
@@ -291,9 +286,14 @@ export function mountReport({ endpoint, url, load, render, exportLabel }) {
         const account = byId('admin-account');
         account.querySelector('.account-name').textContent = session.get()?.user.fullName ?? '';
         account.hidden = false;
-        byId('admin-logout').addEventListener('click', () => {
-            session.set(null);
-            location.replace('/login');
+        const logout = byId('admin-logout');
+        logout.addEventListener('click', async () => {
+            logout.disabled = true;
+            try { await session.logout(); }
+            catch (error) {
+                showMessage(errorBox, error.message);
+                logout.disabled = false;
+            }
         });
     }
 

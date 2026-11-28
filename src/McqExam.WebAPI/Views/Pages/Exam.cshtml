@@ -1,6 +1,8 @@
 <div class="page exam-page">
     <p id="loading-exam" class="card state" role="status">Loading test…</p>
     <p id="exam-error" class="alert" role="alert" hidden></p>
+    <a id="exam-sign-in" class="button secondary" href="/login" hidden>Sign in to resume</a>
+    <p id="exam-save-status" class="alert" role="status" hidden></p>
     <a id="new-test" class="button secondary" href="/setup" hidden>New Test</a>
     <section id="exam-toolbar" class="card exam-toolbar" aria-label="Test controls" hidden>
         <div><h1 id="exam-subject"></h1><span class="badge" id="exam-mode"></span></div>
@@ -58,5 +60,5 @@
     </dialog>
 </div>
 @section Scripts {
-    <script type="module" src="~/js/exam.js" asp-append-version="true"></script>
+    <script type="module" app-script="exam.js"></script>
 }

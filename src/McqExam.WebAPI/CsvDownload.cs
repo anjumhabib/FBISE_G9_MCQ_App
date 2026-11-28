@@ -1,5 +1,8 @@
 using System.Collections;
 using System.Reflection;
+using System.Globalization;
+using System.Text.Json.Serialization;
+using McqExam.Application;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
@@ -7,9 +10,24 @@ using Microsoft.Extensions.Options;
 
 namespace McqExam.WebAPI;
 
-public sealed class CsvDownload(IOptions<JsonOptions> json)
+public sealed class CsvDownload(IOptions<JsonOptions> json, ReportTimeZones zones)
 {
-    private JsonSerializerOptions Options => json.Value.JsonSerializerOptions;
+    private readonly JsonSerializerOptions options = CreateOptions(json.Value.JsonSerializerOptions, zones.Csv);
+
+    private static JsonSerializerOptions CreateOptions(JsonSerializerOptions source, TimeZoneInfo zone)
+    {
+        var copy = new JsonSerializerOptions(source);
+        copy.Converters.Insert(0, new CsvInstantConverter(zone));
+        return copy;
+    }
+
+    private sealed class CsvInstantConverter(TimeZoneInfo zone) : JsonConverter<DateTime>
+    {
+        public override DateTime Read(ref Utf8JsonReader reader, Type type, JsonSerializerOptions options) => reader.GetDateTime();
+        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options) =>
+            writer.WriteStringValue(TimeZoneInfo.ConvertTime(new DateTimeOffset(ReportCalendar.Utc(value)), zone)
+                .ToString("yyyy-MM-dd'T'HH:mm:ss.fffffffzzz", CultureInfo.InvariantCulture));
+    }
 
     public FileContentResult File<T>(string name, IEnumerable<T> rows)
     {
@@ -19,7 +37,7 @@ public sealed class CsvDownload(IOptions<JsonOptions> json)
         foreach (var row in rows)
         {
             var cells = new Dictionary<string, string>(StringComparer.Ordinal);
-            Flatten(JsonSerializer.SerializeToElement(row, Options), "", cells);
+            Flatten(JsonSerializer.SerializeToElement(row, options), "", cells);
             WriteRow(csv, columns.Select(column => cells.GetValueOrDefault(column) ?? ""));
         }
 
@@ -33,7 +51,7 @@ public sealed class CsvDownload(IOptions<JsonOptions> json)
     {
         foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
-            var name = Options.PropertyNamingPolicy?.ConvertName(property.Name) ?? property.Name;
+            var name = options.PropertyNamingPolicy?.ConvertName(property.Name) ?? property.Name;
             var path = prefix + name;
             var value = property.PropertyType;
             if (value.IsClass && value != typeof(string) && !typeof(IEnumerable).IsAssignableFrom(value))

@@ -5,6 +5,8 @@ const button = form.querySelector('button[type="submit"]');
 const idleLabel = button.textContent;
 const errorBox = byId('auth-error');
 const fields = [...form.querySelectorAll('input')];
+if (form.dataset.mode === 'login' && new URLSearchParams(location.search).get('reason') === 'expired')
+    showMessage(errorBox, 'Sign in again to continue where you left off.');
 
 function validate(input) {
     const valid = input.checkValidity();

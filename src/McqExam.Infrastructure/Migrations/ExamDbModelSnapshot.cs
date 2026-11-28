@@ -481,6 +481,35 @@ namespace McqExam.Infrastructure.Migrations
                     b.ToTable("Questions");
                 });
 
+            modelBuilder.Entity("McqExam.Domain.RefreshSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAt");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshSessions");
+                });
+
             modelBuilder.Entity("McqExam.Domain.Subject", b =>
                 {
                     b.Property<int>("Id")
@@ -541,6 +570,21 @@ namespace McqExam.Infrastructure.Migrations
                             IsActive = true,
                             Name = "Computer Science"
                         });
+                });
+
+            modelBuilder.Entity("McqExam.Domain.TimedExamDeadline", b =>
+                {
+                    b.Property<Guid>("AttemptId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("FinalizeAfter")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("AttemptId");
+
+                    b.HasIndex("FinalizeAfter");
+
+                    b.ToTable("TimedExamDeadlines");
                 });
 
             modelBuilder.Entity("McqExam.Domain.User", b =>
@@ -689,6 +733,26 @@ namespace McqExam.Infrastructure.Migrations
                     b.Navigation("Chapter");
                 });
 
+            modelBuilder.Entity("McqExam.Domain.RefreshSession", b =>
+                {
+                    b.HasOne("McqExam.Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("McqExam.Domain.TimedExamDeadline", b =>
+                {
+                    b.HasOne("McqExam.Domain.ExamAttempt", null)
+                        .WithOne("Finalization")
+                        .HasForeignKey("McqExam.Domain.TimedExamDeadline", "AttemptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("McqExam.Domain.UserVisitLog", b =>
                 {
                     b.HasOne("McqExam.Domain.User", null)
@@ -705,6 +769,8 @@ namespace McqExam.Infrastructure.Migrations
             modelBuilder.Entity("McqExam.Domain.ExamAttempt", b =>
                 {
                     b.Navigation("Answers");
+
+                    b.Navigation("Finalization");
                 });
 
             modelBuilder.Entity("McqExam.Domain.Subject", b =>

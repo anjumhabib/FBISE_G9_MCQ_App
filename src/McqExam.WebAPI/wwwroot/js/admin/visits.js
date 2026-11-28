@@ -1,7 +1,7 @@
 import { byId, showMessage } from '../site.js';
 import { drawChart } from './charts.js';
 import { mountReport, navigateUrl } from './report.js';
-import { badge, count, date, deviceBreakdown, link, noValue, paginate, table, timestamp } from './ui.js';
+import { badge, calendarDate, count, deviceBreakdown, link, noValue, paginate, table, timestamp } from './ui.js';
 
 const hour = value => String(value).padStart(2, '0') + ':00';
 const eventNames = {
@@ -24,11 +24,10 @@ mountReport({
         showMessage(byId('visits-peak-day-count'), peakDay.visits ? count(peakDay.visits) + ' visits' : '');
 
         const daily = data.dailyUniqueVisitors;
-        const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
         drawChart(byId('visits-daily'), {
-            type: 'line', label: 'Daily unique visitors', labels: daily.map(item => day.format(new Date(item.date))),
+            type: 'line', label: 'Daily unique visitors', labels: daily.map(item => calendarDate(item.date, true)),
             series: [{ label: 'Unique visitors', values: daily.map(item => item.uniqueVisitors) }],
-            dataTable: { headers: ['Date (UTC)', 'Unique visitors'], rows: daily.map(item => [date(item.date), count(item.uniqueVisitors)]) },
+            dataTable: { headers: ['Date', 'Unique visitors'], rows: daily.map(item => [calendarDate(item.date), count(item.uniqueVisitors)]) },
             emptyText: 'No visits match these filters.'
         });
 
@@ -36,7 +35,7 @@ mountReport({
         drawChart(byId('visits-hourly'), {
             type: 'bar', label: 'Visits by hour', labels: hourly.map(item => hour(item.hour)),
             series: [{ label: 'Visits', values: hourly.map(item => item.visits) }],
-            dataTable: { headers: ['Hour (UTC)', 'Visits'], rows: hourly.map(item => [hour(item.hour), count(item.visits)]) },
+            dataTable: { headers: ['Hour', 'Visits'], rows: hourly.map(item => [hour(item.hour), count(item.visits)]) },
             emptyText: 'No visits match these filters.'
         });
 
@@ -51,7 +50,7 @@ mountReport({
         });
         table(byId('visits-table'), {
             label: 'Visit log', wrap: [1, 3],
-            headers: ['Timestamp (UTC)', 'Student', 'Event', 'Path', 'IP address', 'Device', 'Browser'],
+            headers: ['Timestamp', 'Student', 'Event', 'Path', 'IP address', 'Device', 'Browser'],
             rows: visits.items.map(visit => [
                 timestamp(visit.visitedAt), visit.studentId ? studentFilter(visit, query) : 'Anonymous',
                 badge(eventNames[visit.eventType] ?? visit.eventType), visit.path, visit.ipAddress,

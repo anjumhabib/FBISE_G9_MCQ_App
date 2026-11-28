@@ -7,7 +7,7 @@
 <div class="admin-chart-grid">
     <section class="card report-card admin-chart-card" aria-labelledby="attempt-trend-title">
         <h2 id="attempt-trend-title">Test activity</h2>
-        <p class="muted">Daily exam attempts over the last 30 days (UTC)</p>
+        <p class="muted">Daily exam attempts over the last 30 days</p>
         <div id="dashboard-trend"></div>
     </section>
     <section class="card report-card admin-chart-card" aria-labelledby="subject-average-title">
@@ -22,5 +22,5 @@
     <div id="dashboard-pages"></div>
 </section>
 @section Scripts {
-    <script type="module" src="~/js/admin/dashboard.js" asp-append-version="true"></script>
+    <script type="module" app-script="admin/dashboard.js"></script>
 }

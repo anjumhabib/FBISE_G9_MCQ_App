@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace McqExam.WebAPI;
 
 [ApiExplorerSettings(IgnoreApi = true)]
+[ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 [TrackVisit(UserVisitEventType.PageView)]
 public sealed class PagesController : Controller
 {

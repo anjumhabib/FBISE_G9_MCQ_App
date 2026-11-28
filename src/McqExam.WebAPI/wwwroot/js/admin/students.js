@@ -41,7 +41,7 @@ function renderList(data, { query, tab, setPage }) {
 
     table(byId('student-table'), {
         label: 'Student performance', wrap: [0, 4],
-        headers: ['Student', 'Registered (UTC)', 'Last login (UTC)', 'Last visit device', 'Tests by device', 'Tests', 'Completed', 'Incomplete',
+        headers: ['Student', 'Registered', 'Last login', 'Last visit device', 'Tests by device', 'Tests', 'Completed', 'Incomplete',
             'Average score', 'Best subject', 'Weakest subject', 'Time spent'],
         rows: data.items.map(row => {
             const detailQuery = new URLSearchParams(query);
@@ -72,8 +72,8 @@ function renderDetail(data, { query, setPage }) {
     byId('student-profile').replaceChildren();
     if (row) {
         facts(byId('student-profile'), [
-            ['Email', row.student.email], ['Registered (UTC)', date(row.student.createdAt)],
-            ['Last login (UTC)', row.lastLoginAt ? timestamp(row.lastLoginAt) : 'Never'],
+            ['Email', row.student.email], ['Registered', date(row.student.createdAt)],
+            ['Last login', row.lastLoginAt ? timestamp(row.lastLoginAt) : 'Never'],
             ['Last visit device', row.student.lastVisitDevice ?? 'Unknown'],
             ['Account', row.isActive ? 'Active' : 'Inactive']
         ]);

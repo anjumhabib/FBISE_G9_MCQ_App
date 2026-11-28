@@ -27,7 +27,7 @@
     <link rel="icon" href="~/favicon.svg">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true">
     <link rel="stylesheet" href="~/css/public.css" asp-append-version="true">
-    <script src="~/js/session.js" asp-append-version="true" data-protected="@(protectedPage ? "true" : "false")"></script>
+    <script app-script="session.js" data-protected="@(protectedPage ? "true" : "false")"></script>
     @if (adSettings is not null)
     {
         <meta name="mcq-ad-settings" data-script-url="@adSettings.ScriptUrl"
@@ -63,7 +63,7 @@
         @RenderBody()
     </main>
     <partial name="_PublicFooter" />
-    <script type="module" src="~/js/layout.js" asp-append-version="true"></script>
+    <script type="module" app-script="layout.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

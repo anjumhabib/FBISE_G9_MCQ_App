@@ -198,6 +198,10 @@ Copy the full output, including any trailing `=`, and save a backup in a passwor
 
 Keep the real key and any seed credentials on the server and out of Git and shared release ZIPs. If an upload replaces the deployed `web.config`, restore the entry with the same key before starting the site. Changing the key invalidates existing sign-ins. [Microsoft IIS configuration guide](https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/aspnet-core-module?view=aspnetcore-10.0#set-environment-variables)
 
+Users signed in before the session recovery update may need to sign in once to receive a refresh cookie. The update adds refresh-session and timed-exam deadline tables without rewriting existing records.
+
+Admin reports and print views use the viewer’s browser timezone. CSV exports use `DisplayTimeZone` in `appsettings.json` or IIS environment variables. The default is `Asia/Karachi` (PKT, UTC+5). SQLite timestamps remain in UTC.
+
 ## Architecture
 
 - `Domain` contains the entities and enums.

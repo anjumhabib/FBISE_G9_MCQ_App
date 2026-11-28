@@ -7,13 +7,22 @@ if (student) void init(student);
 async function init(student) {
     const id = document.body.dataset.attemptId;
     const path = '/api/exams/' + encodeURIComponent(id);
+    const draftKey = 'mcq-draft-' + student.id + '-' + id;
+    const signIn = byId('exam-sign-in');
+    signIn.href = session.loginUrl(true);
+    function showError(error) {
+        showMessage(byId('exam-error'), error?.message);
+        signIn.hidden = error?.status !== 401;
+    }
     let test;
     try {
-        test = await api(path);
+        test = await api(path, { keepPage: true });
     } catch (error) {
-        if (error.status === 409) location.replace('/review/' + encodeURIComponent(id));
-        else {
-            showMessage(byId('exam-error'), error.message);
+        if (error.status === 409) {
+            session.write(draftKey, null);
+            location.replace('/review/' + encodeURIComponent(id));
+        } else {
+            showError(error);
             byId('new-test').hidden = false;
         }
         return;
@@ -28,10 +37,10 @@ async function init(student) {
     const submitButton = byId('open-submit');
     const dialog = byId('confirm-submit');
     const total = test.questions.length;
-    const draftKey = 'mcq-draft-' + student.id + '-' + id;
     const draft = session.read(draftKey);
     const answers = { ...Object.fromEntries(test.savedAnswers.map(item => [item.questionId, item.selectedOption])), ...draft?.answers };
     const marked = new Set(draft?.marked);
+    const pending = { ...draft?.pending };
     let index = Math.min(Math.max(draft?.index ?? 0, 0), total - 1);
     const offset = Date.parse(test.serverTime) - Date.now();
     const started = Date.parse(test.startedAt);
@@ -39,6 +48,8 @@ async function init(student) {
     let remaining = 0;
     let submitting = false;
     let autoSubmitted = false;
+    let retryTimer;
+    let completed = false;
     let checkpoint = Promise.resolve();
     let timer;
 
@@ -55,7 +66,7 @@ async function init(student) {
     });
     byId('question-palette').append(...palette);
 
-    function save() { session.write(draftKey, { answers, marked: [...marked], index }); }
+    function save() { session.write(draftKey, { answers, marked: [...marked], index, pending }); }
 
     function renderQuestion() {
         const question = current();
@@ -84,7 +95,9 @@ async function init(student) {
         }
         options.disabled = markButton.disabled = Boolean(locked());
         previous.disabled = index === 0 || submitting;
-        next.disabled = index === total - 1 || submitting;
+        const finalQuestion = index === total - 1;
+        next.disabled = submitting;
+        next.textContent = finalQuestion ? (submitting ? 'Submitting…' : 'Finish Exam') : 'Next';
         const isMarked = marked.has(question.id);
         selectButton(markButton, isMarked, 'marked');
         markButton.textContent = isMarked ? 'Marked for Review' : 'Mark for Review';
@@ -110,14 +123,34 @@ async function init(student) {
     function choose(option) {
         if (locked()) return;
         const questionId = current().id;
-        answers[questionId] = option;
+        answers[questionId] = pending[questionId] = option;
         save();
         updateControls();
-        checkpoint = checkpoint.then(() => {
-            if (answers[questionId] === option) {
-                return api(path + '/answers', { method: 'PUT', body: { questionId, selectedOption: option } });
-            }
-        }).catch(() => { /* The final submission includes every answer in the local draft. */ });
+        syncAnswer(questionId, option);
+    }
+
+    function syncAnswer(questionId, option) {
+        const status = byId('exam-save-status');
+        showMessage(status, 'Saving answers…');
+        checkpoint = checkpoint.then(async () => {
+            if (completed || pending[questionId] !== option) return;
+            await api(path + '/answers', {
+                method: 'PUT', body: { questionId: Number(questionId), selectedOption: option }, keepPage: true
+            });
+            if (completed) return;
+            if (pending[questionId] === option) delete pending[questionId];
+            save();
+            if (!Object.keys(pending).length) showMessage(status);
+        }).catch(error => {
+            if (completed) return;
+            if (error.status === 401) showError(error);
+            showMessage(status, 'Some answers are still on this device. Finish the exam to send them.');
+        });
+    }
+
+    function syncPending() {
+        if (locked()) return;
+        for (const [questionId, option] of Object.entries(pending)) syncAnswer(questionId, option);
     }
 
     function go(position) {
@@ -130,22 +163,27 @@ async function init(student) {
     }
 
     async function submit() {
-        if (submitting) return;
+        if (submitting || completed) return;
+        clearTimeout(retryTimer);
         dialog.close();
         submitting = true;
-        showMessage(byId('exam-error'));
+        showError();
         updateControls();
         try {
             const timeSpentSeconds = Math.max(0, Math.floor((Date.now() + offset - started) / 1000));
             const selected = Object.entries(answers).map(([questionId, selectedOption]) => ({ questionId: Number(questionId), selectedOption }));
-            await api(path + '/submit', { method: 'POST', body: { timeSpentSeconds, answers: selected } });
+            await api(path + '/submit', { method: 'POST', body: { timeSpentSeconds, answers: selected }, keepPage: true });
+            completed = true;
             clearInterval(timer);
             session.write(draftKey, null);
             location.assign(reviewUrl);
         } catch (error) {
-            showMessage(byId('exam-error'), error.message);
+            showError(error);
             submitting = false;
             updateControls();
+            if (autoSubmitted && navigator.onLine && (!error.status || error.status >= 500)) {
+                retryTimer = setTimeout(() => { void submit(); }, 5000);
+            }
         }
     }
 
@@ -172,8 +210,19 @@ async function init(student) {
         updateControls();
     });
     previous.addEventListener('click', () => go(index - 1));
-    next.addEventListener('click', () => go(index + 1));
-    submitButton.addEventListener('click', () => { if (locked()) void submit(); else dialog.showModal(); });
+    function finishExam() {
+        if (locked()) void submit();
+        else dialog.showModal();
+    }
+    next.addEventListener('click', () => {
+        if (index === total - 1) finishExam();
+        else go(index + 1);
+    });
+    submitButton.addEventListener('click', finishExam);
+    window.addEventListener('online', () => {
+        if (autoSubmitted) void submit();
+        else syncPending();
+    });
     byId('keep-working').addEventListener('click', () => dialog.close());
     byId('submit-test').addEventListener('click', submit);
     document.addEventListener('keydown', event => {
@@ -203,6 +252,7 @@ async function init(student) {
         clock.querySelector('strong').textContent = 'Untimed';
         clock.querySelector('small').textContent = 'Practice mode';
     }
+    syncPending();
     byId('exam-toolbar').hidden = byId('exam-layout').hidden = false;
     void activateAds();
 }

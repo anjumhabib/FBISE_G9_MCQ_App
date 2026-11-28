@@ -71,7 +71,7 @@ public sealed class ExamStore(ExamDb db) : IExamStore
         await db.Entry(attempt).Reference(x => x.Subject).LoadAsync(ct);
     }
 
-    private IQueryable<ExamAttempt> WithAnswers() => db.ExamAttempts.Include(x => x.Subject)
+    private IQueryable<ExamAttempt> WithAnswers() => db.ExamAttempts.Include(x => x.Subject).Include(x => x.Finalization)
         .Include(x => x.Answers).ThenInclude(x => x.Question).ThenInclude(x => x.Chapter);
 
     public Task<ExamAttempt?> Find(Guid id, int userId, CancellationToken ct) =>
@@ -82,21 +82,29 @@ public sealed class ExamStore(ExamDb db) : IExamStore
                 db.ExamAttempts.Any(attempt => attempt.Id == id && attempt.UserId == userId && attempt.CompletedAt == null))
             .ExecuteUpdateAsync(update => update.SetProperty(x => x.SelectedOption, answer.SelectedOption), ct) == 1;
 
-    public async Task<bool> SaveSubmission(CancellationToken ct)
+    public async Task<List<(Guid Id, int UserId)>> Overdue(DateTime now, int limit, CancellationToken ct)
     {
-        try
-        {
-            // A concurrent draft write may have changed even a selection that matches our original value.
-            foreach (var answer in db.ChangeTracker.Entries<ExamAnswer>())
-                answer.Property(x => x.SelectedOption).IsModified = true;
-            await db.SaveChangesAsync(ct);
-            return true;
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            db.ChangeTracker.Clear();
-            return false;
-        }
+        var rows = await db.TimedExamDeadlines.AsNoTracking().Where(x => x.FinalizeAfter < now)
+            .OrderBy(x => x.FinalizeAfter).ThenBy(x => x.AttemptId).Take(limit)
+            .Join(db.ExamAttempts, deadline => deadline.AttemptId, attempt => attempt.Id,
+                (deadline, attempt) => new { attempt.Id, attempt.UserId }).ToListAsync(ct);
+        return rows.Select(x => (x.Id, x.UserId)).ToList();
+    }
+
+    public async Task<T> WithinSubmission<T>(Func<Task<T>> action, CancellationToken ct)
+    {
+        // Reserve the SQLite writer before reading the answers to grade.
+        db.ChangeTracker.Clear();
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        var result = await action();
+        await transaction.CommitAsync(ct);
+        return result;
+    }
+
+    public async Task SaveSubmission(ExamAttempt attempt, CancellationToken ct)
+    {
+        if (attempt.Finalization is { } deadline) db.TimedExamDeadlines.Remove(deadline);
+        await db.SaveChangesAsync(ct);
     }
 
     public Task<List<ExamAttempt>> History(int userId, CancellationToken ct) =>

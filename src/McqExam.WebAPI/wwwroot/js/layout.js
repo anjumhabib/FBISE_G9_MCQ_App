@@ -15,9 +15,14 @@ if (student) {
 }
 if (document.body.dataset.publicAds === 'true') void activateAds();
 
-byId('logout').addEventListener('click', () => {
-    session.set(null);
-    location.replace('/login');
+const logout = byId('logout');
+logout.addEventListener('click', async () => {
+    logout.disabled = true;
+    try { await session.logout(); }
+    catch {
+        logout.textContent = 'Retry sign out';
+        logout.disabled = false;
+    }
 });
 document.querySelector('.skip-link').addEventListener('click', event => {
     event.preventDefault();
@@ -28,6 +33,5 @@ document.querySelector('.skip-link').addEventListener('click', event => {
 window.addEventListener('pageshow', event => {
     if (!event.persisted) return;
     const current = session.read('mcq-session');
-    if (!current && document.body.dataset.protected === 'true') location.replace(session.loginUrl());
-    else if (current?.token !== session.get()?.token || document.body.dataset.protected === 'true') location.reload();
+    if (current?.token !== session.get()?.token || document.body.dataset.protected === 'true') location.reload();
 });

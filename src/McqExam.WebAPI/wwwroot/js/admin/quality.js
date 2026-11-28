@@ -71,7 +71,7 @@ function renderMedia(container, issues) {
 function renderAnomalies(container, issues) {
     table(container, {
         label: 'Unfinished and fast submissions', wrap: [1],
-        headers: ['Started (UTC)', 'Student', 'Subject', 'Mode', 'Start device', 'Finding', 'Seconds / question', 'Review'],
+        headers: ['Started', 'Student', 'Subject', 'Mode', 'Start device', 'Finding', 'Seconds / question', 'Review'],
         rows: issues.map(({ attempt, abandoned, secondsPerQuestion }) => [
             timestamp(attempt.startedAt),
             link(attempt.studentName, '/admin/students?studentId=' + encodeURIComponent(attempt.studentId)),

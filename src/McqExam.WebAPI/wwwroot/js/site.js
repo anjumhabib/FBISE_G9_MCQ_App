@@ -1,4 +1,5 @@
 export const session = window.mcqSession;
+await session.ready;
 export const byId = id => document.getElementById(id);
 export const letters = ['A', 'B', 'C', 'D'];
 export const field = (root, name) => root.querySelector('[data-field="' + name + '"]');
@@ -9,31 +10,52 @@ export function showMessage(element, message = '') {
     element.hidden = !message;
 }
 
-export async function api(path, { method = 'GET', body, signal } = {}) {
+export async function request(path, { method = 'GET', body, signal, optional = false, keepPage = false } = {}) {
     const authRequest = path.startsWith('/api/auth/');
-    const user = authRequest ? null : session.get();
-    const headers = {};
-    if (user) headers.Authorization = 'Bearer ' + user.token;
-    if (body !== undefined) headers['Content-Type'] = 'application/json';
-
-    let response;
+    const required = !optional && /^\/api\/(?:admin|exams|reports)(?:\/|\?|$)/.test(path);
+    const send = user => {
+        const headers = {};
+        if (user?.token) headers.Authorization = 'Bearer ' + user.token;
+        if (body !== undefined) headers['Content-Type'] = 'application/json';
+        return fetch(path, { method, headers, signal, body: body === undefined ? undefined : JSON.stringify(body) });
+    };
+    let user = authRequest ? null : session.get();
     try {
-        response = await fetch(path, { method, headers, signal, body: body === undefined ? undefined : JSON.stringify(body) });
+        if (authRequest) return await session.withCookie(() => send(null));
+        if (required && !user?.token) user = await session.refresh();
+        let response = await send(user);
+        if (response.status !== 401 || !required) return response;
+        signal?.throwIfAborted();
+        const rejectedToken = user?.token;
+        const active = session.get();
+        const renewed = active?.token && active.token !== rejectedToken ? active
+            : rejectedToken ? await session.refresh() : null;
+        if (renewed?.token && renewed.user.id === user.user.id) {
+            response = await send(renewed);
+            if (response.status === 401 && session.get()?.token === renewed.token && !keepPage)
+                location.replace(session.loginUrl(true));
+        } else if (rejectedToken) {
+            if (session.get()?.token === rejectedToken) session.set(null);
+            if (!keepPage) location.replace(session.loginUrl(true));
+        }
+        return response;
     } catch (error) {
         if (error.name === 'AbortError') throw error;
         throw new Error('The server could not be reached. Check your connection and try again.');
     }
+}
+
+export async function api(path, options) {
+    const authRequest = path.startsWith('/api/auth/');
+    const response = await request(path, options);
     if (response.status === 204) return;
     const data = await response.json().catch(() => null);
     if (response.ok && data !== null) return data;
 
-    if (response.status === 401 && !authRequest && session.get()?.token === user?.token) {
-        session.set(null);
-        location.replace(session.loginUrl());
-    }
     const message = response.status === 429
         ? (authRequest ? 'Too many sign-in attempts. Please wait a minute and try again.'
             : 'Too many requests. Please wait a moment and try again.')
+        : response.status === 401 && !authRequest ? 'Your session ended. Sign in to continue.'
         : data?.detail || (data?.errors && Object.values(data.errors).flat().join(' '))
         || 'Something went wrong. Please try again.';
     throw Object.assign(new Error(message), { status: response.status });

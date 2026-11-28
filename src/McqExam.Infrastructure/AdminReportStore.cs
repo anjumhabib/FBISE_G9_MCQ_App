@@ -145,16 +145,18 @@ public sealed class AdminReportStore(ExamDb db) : IAdminReportStore
             query = query.Where(x => x.Visit.Path.ToLower().Contains(search) ||
                 (x.Student != null && (x.Student.FullName.ToLower().Contains(search) || x.Student.Email.Contains(search))));
 
-        var activity = filter.ExportCsv ? [] : await query.GroupBy(x => new
+        var zoneId = filter.ReportingTimeZone.Id;
+        var buckets = filter.ExportCsv ? [] : await query.GroupBy(x => new
         {
-            Day = x.Visit.VisitedAt.Date,
-            Hour = x.Visit.VisitedAt.Hour,
+            LocalHour = ExamDb.VisitLocalHour(x.Visit.VisitedAt, zoneId),
             x.Visit.UserId,
             StudentName = x.Student == null ? null : x.Student.FullName,
             x.Visit.SessionKey,
             Device = ExamDb.VisitDevice(x.Visit.UserAgent)
-        }).Select(g => new AdminVisitActivity(g.Key.Day, g.Key.Hour, g.Key.UserId, g.Key.StudentName,
-            g.Key.SessionKey, g.Key.Device, g.Count(), g.Count(x => x.Visit.EventType == UserVisitEventType.Login))).ToListAsync(ct);
+        }).Select(g => new { g.Key, Visits = g.Count(), Logins = g.Count(x => x.Visit.EventType == UserVisitEventType.Login) })
+            .ToListAsync(ct);
+        var activity = buckets.Select(g => new AdminVisitActivity(g.Key.LocalHour.Date, g.Key.LocalHour.Hour,
+            g.Key.UserId, g.Key.StudentName, g.Key.SessionKey, g.Key.Device, g.Visits, g.Logins)).ToArray();
         var total = activity.Sum(x => x.Visits);
         var offset = ((long)filter.Page - 1) * filter.PageSize;
         if (!filter.ExportCsv && offset >= total)
@@ -264,9 +266,9 @@ public sealed class AdminReportStore(ExamDb db) : IAdminReportStore
         Expression<Func<T, DateTime>> timestamp)
     {
         if (filter.FromDate is { } from)
-            query = query.Where(Compare(timestamp, from.ToDateTime(TimeOnly.MinValue), true));
-        if (filter.ToDate is { } to)
-            query = query.Where(Compare(timestamp, to.ToDateTime(TimeOnly.MaxValue), false));
+            query = query.Where(Compare(timestamp, ReportCalendar.StartUtc(from, filter.ReportingTimeZone), true));
+        if (filter.ToDate is { } to && to < DateOnly.MaxValue)
+            query = query.Where(Compare(timestamp, ReportCalendar.StartUtc(to.AddDays(1), filter.ReportingTimeZone), false));
         return query;
     }
 
@@ -277,7 +279,7 @@ public sealed class AdminReportStore(ExamDb db) : IAdminReportStore
         Expression<Func<DateTime>> value = () => boundary;
         var body = lower
             ? Expression.GreaterThanOrEqual(timestamp.Body, value.Body)
-            : Expression.LessThanOrEqual(timestamp.Body, value.Body);
+            : Expression.LessThan(timestamp.Body, value.Body);
         return Expression.Lambda<Func<T, bool>>(body, timestamp.Parameters);
     }
 }

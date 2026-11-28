@@ -1,7 +1,7 @@
 import { byId } from '../site.js';
 import { drawChart } from './charts.js';
 import { mountReport } from './report.js';
-import { count, date, deviceBreakdown, paginate, percent, renderAttempts } from './ui.js';
+import { calendarDate, count, deviceBreakdown, paginate, percent, renderAttempts } from './ui.js';
 
 mountReport({
     endpoint: 'dashboard',
@@ -16,11 +16,10 @@ mountReport({
         byId('dashboard-questions').textContent = count(data.totalQuestions);
 
         const trend = data.dailyAttempts;
-        const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
         drawChart(byId('dashboard-trend'), {
-            type: 'line', label: 'Daily exam attempts', labels: trend.map(item => day.format(new Date(item.date))),
+            type: 'line', label: 'Daily exam attempts', labels: trend.map(item => calendarDate(item.date, true)),
             series: [{ label: 'Attempts', values: trend.map(item => item.attempts) }],
-            dataTable: { headers: ['Date (UTC)', 'Attempts'], rows: trend.map(item => [date(item.date), count(item.attempts)]) }
+            dataTable: { headers: ['Date', 'Attempts'], rows: trend.map(item => [calendarDate(item.date), count(item.attempts)]) }
         });
 
         const averages = data.subjectAverages;

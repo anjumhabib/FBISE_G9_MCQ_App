@@ -9,7 +9,7 @@ public sealed class AdminReportService(IAdminReportStore store, TimeProvider clo
     public async Task<AdminDashboard> Dashboard(AdminReportFilter filter, CancellationToken ct)
     {
         var now = clock.GetUtcNow().UtcDateTime;
-        var today = DateOnly.FromDateTime(now);
+        var today = DateOnly.FromDateTime(ReportCalendar.Local(now, filter.ReportingTimeZone));
         var attempts = await store.Attempts(filter, matchSearch: true, ct);
         var students = await store.Students(filter, matchSearch: true, ct);
         var questionCount = await store.QuestionCount(filter, ct);
@@ -27,7 +27,7 @@ public sealed class AdminReportService(IAdminReportStore store, TimeProvider clo
         }
 
         var completed = Completed(attempts);
-        var daily = attempts.ToLookup(x => DateOnly.FromDateTime(x.StartedAt));
+        var daily = attempts.ToLookup(x => DateOnly.FromDateTime(ReportCalendar.Local(x.StartedAt, filter.ReportingTimeZone)));
         var trend = Enumerable.Range(0, 30).Select(i => today.AddDays(i - 29))
             .Select(day => new AdminDailyAttempts(day, daily[day].Count())).ToArray();
         var subjects = completed.GroupBy(x => x.Subject)

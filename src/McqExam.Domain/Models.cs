@@ -83,6 +83,7 @@ public sealed class ExamAttempt
     public int TimeSpentSeconds { get; set; }
     public DateTime StartedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
+    public TimedExamDeadline? Finalization { get; set; }
     public List<ExamAnswer> Answers { get; } = [];
 }
 

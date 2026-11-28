@@ -5,6 +5,8 @@ namespace McqExam.Application;
 
 public sealed class ExamService(IExamStore store, TimeProvider clock)
 {
+    private static readonly TimeSpan SubmissionGrace = TimeSpan.FromSeconds(5);
+
     public Task<IReadOnlyList<SubjectInfo>> Subjects(CancellationToken ct) => store.Subjects(ct);
 
     public async Task<ActiveExam> Start(int userId, StartRequest request, CancellationToken ct, DeviceType device = DeviceType.Unknown)
@@ -27,6 +29,8 @@ public sealed class ExamService(IExamStore store, TimeProvider clock)
             QuestionId = question.Id, Question = question, Position = index + 1,
             CorrectOption = question.CorrectOption, BloomLevel = question.BloomLevel
         }));
+        if (Deadline(attempt) is { } deadline)
+            attempt.Finalization = new() { AttemptId = attempt.Id, FinalizeAfter = deadline.Add(SubmissionGrace) };
         await store.Create(attempt, ct);
         return Active(attempt);
     }
@@ -34,8 +38,11 @@ public sealed class ExamService(IExamStore store, TimeProvider clock)
     public async Task<ActiveExam> Resume(Guid id, int userId, CancellationToken ct)
     {
         var attempt = await Find(id, userId, ct);
-        if (attempt.CompletedAt is not null)
+        if (attempt.CompletedAt is not null || Due(attempt))
+        {
+            if (attempt.CompletedAt is null) await FinalizeAttempt(id, userId, ct);
             throw new RequestFailure("This test has already been submitted.", 409);
+        }
         return Active(attempt);
     }
 
@@ -50,15 +57,40 @@ public sealed class ExamService(IExamStore store, TimeProvider clock)
             throw new RequestFailure("The test is closed for editing.", 409);
     }
 
-    public async Task<Result> Submit(Guid id, int userId, SubmitRequest request, CancellationToken ct)
+    public Task<Result> Submit(Guid id, int userId, SubmitRequest request, CancellationToken ct) =>
+        store.WithinSubmission(async () =>
+        {
+            var attempt = await Find(id, userId, ct);
+            if (attempt.CompletedAt is not null) return Summary(attempt);
+            return await Complete(attempt, request.Answers, ct);
+        }, ct);
+
+    public async Task<int> FinalizeOverdue(int limit, CancellationToken ct)
     {
-        var attempt = await Find(id, userId, ct);
-        if (attempt.CompletedAt is not null)
-            return Summary(attempt);
+        var due = await store.Overdue(clock.GetUtcNow().UtcDateTime, limit, ct);
+        foreach (var (id, userId) in due)
+            await FinalizeAttempt(id, userId, ct);
+        return due.Count;
+    }
+
+    private bool Due(ExamAttempt attempt) => attempt.Finalization is { } deadline &&
+        deadline.FinalizeAfter < clock.GetUtcNow().UtcDateTime;
+
+    private Task<ExamAttempt> FinalizeAttempt(Guid id, int userId, CancellationToken ct) =>
+        store.WithinSubmission(async () =>
+        {
+            var attempt = await Find(id, userId, ct);
+            if (attempt.CompletedAt is null && Due(attempt))
+                await Complete(attempt, null, ct);
+            return attempt;
+        }, ct);
+
+    private async Task<Result> Complete(ExamAttempt attempt, IEnumerable<AnswerInput>? answers, CancellationToken ct)
+    {
 
         var submitted = new Dictionary<int, char?>();
         var assigned = attempt.Answers.Select(answer => answer.QuestionId).ToHashSet();
-        foreach (var answer in request.Answers)
+        foreach (var answer in answers ?? [])
         {
             if (answer is null || !assigned.Contains(answer.QuestionId) ||
                 !ValidOption(answer.SelectedOption) ||
@@ -68,7 +100,7 @@ public sealed class ExamService(IExamStore store, TimeProvider clock)
 
         var now = clock.GetUtcNow().UtcDateTime;
         var deadline = Deadline(attempt);
-        var onTime = deadline is null || now <= deadline.Value.AddSeconds(5);
+        var onTime = answers is not null && (deadline is null || now <= deadline.Value.Add(SubmissionGrace));
         foreach (var answer in attempt.Answers)
         {
             if (onTime) answer.SelectedOption = submitted.GetValueOrDefault(answer.QuestionId);
@@ -78,15 +110,16 @@ public sealed class ExamService(IExamStore store, TimeProvider clock)
         attempt.ScorePercent = Percent(attempt.CorrectCount, attempt.TotalQuestions);
         var elapsed = (int)Math.Clamp((now - Utc(attempt.StartedAt)).TotalSeconds, 0, int.MaxValue);
         attempt.TimeSpentSeconds = deadline is null ? elapsed : Math.Min(elapsed, attempt.TotalQuestions * 60);
-        attempt.CompletedAt = now;
-        if (!await store.SaveSubmission(ct))
-            attempt = await Find(id, userId, ct);
+        attempt.CompletedAt = answers is null ? deadline ?? now : now;
+        await store.SaveSubmission(attempt, ct);
         return Summary(attempt);
     }
 
     public async Task<Review> Review(Guid id, int userId, CancellationToken ct)
     {
         var attempt = await Find(id, userId, ct);
+        if (attempt.CompletedAt is null && Due(attempt))
+            attempt = await FinalizeAttempt(id, userId, ct);
         if (attempt.CompletedAt is null)
             throw new RequestFailure("Submit this test before opening the answer review.", 409);
         return new Review(Summary(attempt), attempt.Answers.OrderBy(x => x.Position)

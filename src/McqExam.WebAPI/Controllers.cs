@@ -8,15 +8,52 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace McqExam.WebAPI;
 
 [ApiController, Route("api/auth"), EnableRateLimiting("authentication")]
-public sealed class AuthController(AuthService service) : ControllerBase
+public sealed class AuthController(AuthService service, RefreshSessions sessions) : ControllerBase
 {
+    private const string RefreshCookie = "mcq-refresh";
+    private static readonly CookieBuilder Cookie = new()
+    {
+        Name = RefreshCookie, HttpOnly = true, SameSite = SameSiteMode.Lax,
+        Path = "/api/auth", SecurePolicy = CookieSecurePolicy.SameAsRequest
+    };
+
+    private AuthSession SetRefreshCookie(RenewedSession session)
+    {
+        var options = Cookie.Build(HttpContext);
+        options.Expires = new DateTimeOffset(session.ExpiresAt, TimeSpan.Zero);
+        Response.Cookies.Append(RefreshCookie, session.Token, options);
+        return session.Access;
+    }
+
     [HttpPost("register")]
     public async Task<ActionResult<AuthSession>> Register(RegisterRequest request, CancellationToken ct) =>
-        StatusCode(201, await service.Register(request, ct));
+        StatusCode(201, SetRefreshCookie(await sessions.Start(await service.Register(request, ct), Request.Cookies[RefreshCookie], ct)));
 
     [HttpPost("login")]
     [TrackVisit(UserVisitEventType.Login)]
-    public Task<AuthSession> Login(LoginRequest request, CancellationToken ct) => service.Login(request, ct);
+    public async Task<AuthSession> Login(LoginRequest request, CancellationToken ct) =>
+        SetRefreshCookie(await sessions.Start(await service.Login(request, ct), Request.Cookies[RefreshCookie], ct));
+
+    [HttpPost("refresh")]
+    [DisableRateLimiting]
+    [Consumes("application/json")]
+    public async Task<ActionResult<AuthSession>> Refresh(CancellationToken ct)
+    {
+        if (!Request.HasJsonContentType()) return StatusCode(StatusCodes.Status415UnsupportedMediaType);
+        var session = await sessions.Renew(Request.Cookies[RefreshCookie], ct);
+        return session is null ? Unauthorized() : SetRefreshCookie(session);
+    }
+
+    [HttpPost("logout")]
+    [DisableRateLimiting]
+    [Consumes("application/json")]
+    public async Task<IActionResult> Logout(CancellationToken ct)
+    {
+        if (!Request.HasJsonContentType()) return StatusCode(StatusCodes.Status415UnsupportedMediaType);
+        await sessions.Logout(Request.Cookies[RefreshCookie], ct);
+        Response.Cookies.Delete(RefreshCookie, Cookie.Build(HttpContext));
+        return NoContent();
+    }
 }
 
 [ApiController, Route("api/subjects")]
